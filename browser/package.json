@@ -1,0 +1,26 @@
+{
+  "name": "bo-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tigerbot/bo.git"
+  },
+  "author": "tigerbot (slgibelyou@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tigerbot/bo/issues"
+  },
+  "homepage": "https://github.com/tigerbot/bo#readme",
+  "devDependencies": {
+    "domready": "^1.0.8",
+    "fabric": "^1.6.3",
+    "gulp": "^3.9.1",
+    "gulp-browser": "^2.1.9",
+    "gulp-pug": "^3.0.3"
+  }
+}
