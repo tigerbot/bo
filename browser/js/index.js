@@ -7,7 +7,7 @@
 
 	domready(function () {
 		var canvas = new fabric.Canvas('main', {
-			backgroundColor: 'rgb(200, 200, 255)',
+			backgroundColor: '#DEEFF7',
 			height: 650,
 			width: 1050,
 		});
