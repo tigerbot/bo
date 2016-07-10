@@ -1,6 +1,10 @@
 (function () {
 	'use strict';
-	var fabric = require('fabric').fabric;
+	var domready = require('domready');
+	var fabric   = require('fabric').fabric;
+
+	var x_sep, y_sep;
+	var water_clr = '#DEEFF7';
 
 	var initial_state = {
 		'A30': {price: 40, coal: false, city: {name: 'Augusta', color: 'black', revenue: [20, 20, 20, 20, 30, 40]}},
@@ -114,20 +118,18 @@
 		};
 		var clrs = [{fill: 'white'}, {fill: 'black'}];
 
-		var x_offset = 0;
 		return new fabric.Group(revenue.map(function (value, index) {
 			var txt = new fabric.Text(value.toString(), rev_opts);
 			var bg  = new fabric.Rect(rev_opts);
 
 			txt.set(clrs[(index+0) % 2]);
 			bg.set( clrs[(index+1) % 2]);
-			x_offset += bg.getWidth();
-			return (new fabric.Group([bg, txt], {originY: 'bottom', originX: 'right', left: x_offset}));
+			return new fabric.Group([bg, txt], {originY: 'bottom', left: index*rev_opts.width});
 		}));
 	}
 
-	function create() {
-		var radius = 50;
+	function create_map() {
+		var radius = 49.5;
 		var pnts = [0, 1, 2, 3, 4, 5].map(function (index) {
 			var angle = (2*index + 1)*Math.PI/6;
 			return {
@@ -135,6 +137,7 @@
 				y: Math.round(1000*radius*(1 + Math.sin(angle)))/1000,
 			};
 		});
+
 		var hex_opts = {
 			fill:    '#688E45',
 			stroke:  'black',
@@ -149,7 +152,7 @@
 			left:      radius,
 		};
 		var coal_opts = {
-			fontSize:  15,
+			fontSize:  13,
 			textAlign: 'center',
 			originX:   'center',
 			originY:   'center',
@@ -175,9 +178,9 @@
 		};
 
 		// we divide the width of the pnts by 2 because the IDs only use every other number.
-		var x_sep = (pnts[0].x - pnts[3].x)/2;
-		var y_sep = 1.5 * radius;
-		var hex_items = Object.keys(initial_state).map(function (id) {
+		x_sep = (pnts[0].x - pnts[3].x)/2 + 0.5;
+		y_sep = 1.5 * (radius+0.5);
+		return new fabric.Group(Object.keys(initial_state).map(function (id) {
 			var details = initial_state[id];
 			var items = [];
 
@@ -195,9 +198,44 @@
 				top:  y_sep*(id.charCodeAt(0) - 65),
 				left: x_sep*parseInt(id.slice(1)),
 			});
-		});
-		return new fabric.Group(hex_items, {selectable: false});
+		}));
 	}
 
-	module.exports.create = create;
+	function board_clicked(event) {
+		// Clicked on a part of the canvas that isn't part of the interactable board
+		if (!event.target) {
+			return;
+		}
+		var row = Math.floor(((event.e.clientY - event.target.getTop() ) / event.target.scaleY) / y_sep);
+		var col = Math.floor(((event.e.clientX - event.target.getLeft()) / event.target.scaleX) / x_sep);
+
+		if (row % 2 === 0) {
+			col = 2*Math.floor(col/2);
+		} else {
+			col = 2*Math.floor((col-1)/2) + 1;
+		}
+
+		var id = String.fromCharCode(row+65) + col;
+		if (!initial_state.hasOwnProperty(id)) {
+			return;
+		}
+		console.log(id);
+	}
+
+	domready(function () {
+		var canvas = new fabric.Canvas('hex-map', {
+			backgroundColor: water_clr,
+			selection: false,
+			height: 650,
+			width: 1050,
+		});
+		var map = create_map(initial_state);
+
+		map.scaleToWidth(canvas.getWidth() - 20);
+		map.set({top: 10, left: 10}); //, hasControls: false, hasBorders: false});
+
+		canvas.add(map);
+		canvas.on('mouse:down', board_clicked);
+		window.canvas = canvas;
+	});
 })();
