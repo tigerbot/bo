@@ -2,9 +2,12 @@
 	'use strict';
 	var domready = require('domready');
 	var fabric   = require('fabric').fabric;
+	var canvas;
 
 	var x_sep, y_sep;
 	var water_clr = '#DEEFF7';
+	var grass_clr = '#688E45';
+	var hex_elems = {};
 
 	var initial_state = {
 		'A30': {price: 40, coal: false, city: {name: 'Augusta', color: 'black', revenue: [20, 20, 20, 20, 30, 40]}},
@@ -129,19 +132,20 @@
 	}
 
 	function create_map() {
-		var radius = 49.5;
+		var radius = 50;
+		var border_width = 1.5;
 		var pnts = [0, 1, 2, 3, 4, 5].map(function (index) {
 			var angle = (2*index + 1)*Math.PI/6;
 			return {
-				x: Math.round(1000*radius*(1 + Math.cos(angle)))/1000,
-				y: Math.round(1000*radius*(1 + Math.sin(angle)))/1000,
+				x: Math.round(1000*(radius - border_width/2)*(1 + Math.cos(angle)))/1000,
+				y: Math.round(1000*(radius - border_width/2)*(1 + Math.sin(angle)))/1000,
 			};
 		});
 
 		var hex_opts = {
-			fill:    '#688E45',
+			fill:    grass_clr,
 			stroke:  'black',
-			strokeWidth: 1,
+			strokeWidth: border_width,
 		};
 		var price_opts = {
 			fontSize:  12,
@@ -178,8 +182,8 @@
 		};
 
 		// we divide the width of the pnts by 2 because the IDs only use every other number.
-		x_sep = (pnts[0].x - pnts[3].x)/2 + 0.5;
-		y_sep = 1.5 * (radius+0.5);
+		x_sep = (pnts[0].x - pnts[3].x + border_width)/2;
+		y_sep = 1.5 * radius;
 		return new fabric.Group(Object.keys(initial_state).map(function (id) {
 			var details = initial_state[id];
 			var items = [];
@@ -190,15 +194,56 @@
 				items.push(new fabric.Text('COAL', coal_opts));
 			}
 			if (details.city) {
-				items.push((new fabric.Text(details.city.name, city_opts)).set({fill: details.city.color}));
 				items.push(create_rev_bar(details.city.revenue).scaleToWidth(1.85*x_sep).set(rev_bar_opts));
+				items.push((new fabric.Text(details.city.name, city_opts)).set({fill: details.city.color}));
 			}
 
-			return new fabric.Group(items, {
+			var group = new fabric.Group(items, {
 				top:  y_sep*(id.charCodeAt(0) - 65),
 				left: x_sep*parseInt(id.slice(1)),
 			});
+
+			hex_elems[id] = {
+				group:    group,
+				selected: false,
+			};
+
+			return group;
 		}));
+	}
+
+	function selected(id) {
+		if (typeof id === 'undefined') {
+			return Object.keys(hex_elems).filter(function (id) {
+				return hex_elems[id].selected;
+			});
+		}
+		if (hex_elems.hasOwnProperty(id)) {
+			return hex_elems[id].selected;
+		}
+		return false;
+	}
+	function select(id) {
+		if (hex_elems.hasOwnProperty(id)) {
+			hex_elems[id].selected = true;
+			hex_elems[id].group.item(0).set({stroke: 'yellow', opacity: 0.8});
+		}
+		canvas.renderAll();
+	}
+	function deselect(id) {
+		var keys;
+		if (id === '*') {
+			keys = selected();
+		} else if (hex_elems.hasOwnProperty(id)) {
+			keys = [ id ];
+		} else {
+			keys = [];
+		}
+		keys.forEach(function (id) {
+			hex_elems[id].selected = false;
+			hex_elems[id].group.item(0).set({stroke: 'black', opacity: 1});
+		});
+		canvas.renderAll();
 	}
 
 	function board_clicked(event) {
@@ -216,14 +261,18 @@
 		}
 
 		var id = String.fromCharCode(row+65) + col;
-		if (!initial_state.hasOwnProperty(id)) {
+		if (!hex_elems.hasOwnProperty(id)) {
 			return;
 		}
-		console.log(id);
+		if (selected(id)) {
+			deselect(id);
+		} else {
+			select(id);
+		}
 	}
 
 	domready(function () {
-		var canvas = new fabric.Canvas('hex-map', {
+		canvas = new fabric.Canvas('hex-map', {
 			backgroundColor: water_clr,
 			selection: false,
 			height: 650,
