@@ -246,29 +246,82 @@
 		canvas.renderAll();
 	}
 
-	function board_clicked(event) {
-		// Clicked on a part of the canvas that isn't part of the interactable board
-		if (!event.target) {
-			return;
-		}
-		var row = Math.floor(((event.e.clientY - event.target.getTop() ) / event.target.scaleY) / y_sep);
-		var col = Math.floor(((event.e.clientX - event.target.getLeft()) / event.target.scaleX) / x_sep);
+	function add_listeners() {
+		var max_space = 10;
+		var pressed = false;
+		var time = 0;
 
-		if (row % 2 === 0) {
-			col = 2*Math.floor(col/2);
-		} else {
-			col = 2*Math.floor((col-1)/2) + 1;
+		function verify_map_pos() {
+			var map = canvas.item(0);
+			if (map.getTop() > max_space) {
+				map.set({ top: max_space });
+			} else if (map.getTop() + map.getHeight() < canvas.getHeight() - max_space) {
+				map.set({ top: canvas.getHeight() - map.getHeight() - max_space });
+			}
+			if (map.getLeft() > max_space) {
+				map.set({ left: max_space });
+			} else if (map.getLeft() + map.getWidth() < canvas.getWidth() - max_space) {
+				map.set({ left: canvas.getWidth() - map.getWidth() - max_space });
+			}
+			canvas.renderAll();
 		}
 
-		var id = String.fromCharCode(row+65) + col;
-		if (!hex_elems.hasOwnProperty(id)) {
-			return;
-		}
-		if (selected(id)) {
-			deselect(id);
-		} else {
-			select(id);
-		}
+		canvas.on('mouse:down', function (event) {
+			time = Date.now();
+			pressed = true;
+		});
+		canvas.on('mouse:up', function (event) {
+			pressed = false;
+			if (!event.target || Date.now() - time > 250) {
+				return;
+			}
+			var row = Math.floor(((event.e.clientY - event.target.getTop() ) / event.target.scaleY) / y_sep);
+			var col = Math.floor(((event.e.clientX - event.target.getLeft()) / event.target.scaleX) / x_sep);
+
+			if (row % 2 === 0) {
+				col = 2*Math.floor(col/2);
+			} else {
+				col = 2*Math.floor((col-1)/2) + 1;
+			}
+
+			var hex_id = String.fromCharCode(row+65) + col;
+			if (hex_selected(hex_id)) {
+				deselect_hex(hex_id);
+			} else {
+				select_hex(hex_id);
+			}
+		});
+		canvas.on('mouse:move', function (event) {
+			if (!pressed) {
+				return;
+			}
+			var map = canvas.item(0);
+			map.set({
+				top:  map.getTop()  + event.e.movementY,
+				left: map.getLeft() + event.e.movementX,
+			});
+
+			verify_map_pos();
+		});
+
+		document.getElementById('hex-map-parent').addEventListener('wheel', function board_zoomed(event) {
+			var map = canvas.item(0);
+			var scale = map.scaleX || 1;
+			if (event.wheelDeltaY < 0) {
+				scale /= 1.1;
+			} else if (event.wheelDeltaY > 0) {
+				scale *= 1.1;
+			}
+			map.scale(scale);
+			if (map.getHeight() < canvas.getHeight() - 2*max_space) {
+				map.scaleToHeight(canvas.getHeight() - 2*max_space);
+			}
+			if (map.getWidth() < canvas.getWidth() - 2*max_space) {
+				map.scaleToWidth(canvas.getWidth() - 2*max_space);
+			}
+
+			verify_map_pos();
+		});
 	}
 
 	domready(function () {
@@ -281,10 +334,9 @@
 		var map = create_map(initial_state);
 
 		map.scaleToWidth(canvas.getWidth() - 20);
-		map.set({top: 10, left: 10}); //, hasControls: false, hasBorders: false});
+		map.set({top: 10, left: 10, selectable: false});
 
 		canvas.add(map);
-		canvas.on('mouse:down', board_clicked);
-		window.canvas = canvas;
+		add_listeners();
 	});
 })();

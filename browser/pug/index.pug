@@ -4,4 +4,7 @@ html(lang="en")
 		title="Baltimore and Ohio"
 		script(src='index.js', type='text/javascript')
 	body
-		canvas#hex-map
+		//- We put the hex map under a div because the library we are using messes with the element
+		//- in a way that makes it difficult to add listeners for resizing and zooming events.
+		div#hex-map-parent
+			canvas#hex-map
