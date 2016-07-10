@@ -159,7 +159,7 @@
 			fontSize:  13,
 			textAlign: 'center',
 			originX:   'center',
-			originY:   'center',
+			originY:   'top',
 			top:       radius,
 			left:      radius,
 			fill:      'white',
@@ -180,6 +180,12 @@
 			top:     radius*1.25,
 			left:    radius,
 		};
+		var rails_opts = {
+			originX: 'center',
+			originY: 'top',
+			top:     pnts[1].y - pnts[0].y,
+			left:    radius,
+		};
 
 		// we divide the width of the pnts by 2 because the IDs only use every other number.
 		x_sep = (pnts[0].x - pnts[3].x + border_width)/2;
@@ -187,16 +193,21 @@
 		return new fabric.Group(Object.keys(initial_state).map(function (id) {
 			var details = initial_state[id];
 			var items = [];
+			var coal = null;
+			var rails;
 
 			items.push(new fabric.Polygon(pnts, hex_opts));
 			items.push(new fabric.Text('$'+details.price, price_opts));
 			if (details.coal) {
-				items.push(new fabric.Text('COAL', coal_opts));
+				coal = new fabric.Text('COAL', coal_opts);
+				items.push(coal);
 			}
 			if (details.city) {
 				items.push(create_rev_bar(details.city.revenue).scaleToWidth(1.85*x_sep).set(rev_bar_opts));
 				items.push((new fabric.Text(details.city.name, city_opts)).set({fill: details.city.color}));
 			}
+			rails = new fabric.Group([], rails_opts);
+			items.push(rails);
 
 			var group = new fabric.Group(items, {
 				top:  y_sep*(id.charCodeAt(0) - 65),
@@ -205,6 +216,8 @@
 
 			hex_elems[id] = {
 				group:    group,
+				coal:     coal,
+				rails:    rails,
 				selected: false,
 			};
 
@@ -212,7 +225,7 @@
 		}));
 	}
 
-	function selected(id) {
+	function hex_selected(id) {
 		if (typeof id === 'undefined') {
 			return Object.keys(hex_elems).filter(function (id) {
 				return hex_elems[id].selected;
@@ -223,14 +236,14 @@
 		}
 		return false;
 	}
-	function select(id) {
+	function select_hex(id) {
 		if (hex_elems.hasOwnProperty(id)) {
 			hex_elems[id].selected = true;
 			hex_elems[id].group.item(0).set({stroke: 'yellow', opacity: 0.8});
 		}
 		canvas.renderAll();
 	}
-	function deselect(id) {
+	function deselect_hex(id) {
 		var keys;
 		if (id === '*') {
 			keys = selected();
@@ -243,6 +256,56 @@
 			hex_elems[id].selected = false;
 			hex_elems[id].group.item(0).set({stroke: 'black', opacity: 1});
 		});
+		canvas.renderAll();
+	}
+
+	function has_coal(id) {
+		if (!hex_elems.hasOwnProperty(id)) {
+			return false;
+		}
+		return hex_elems[id].coal !== null;
+	}
+	function mine_coal(id) {
+		if (!hex_elems.hasOwnProperty(id)) {
+			return false;
+		} else if (hex_elems[id].coal === null) {
+			return false;
+		}
+
+		hex_elems[id].group.remove(hex_elems[id].coal);
+		hex_elems[id].coal = null;
+		canvas.renderAll();
+		return true;
+	}
+
+	function build_rail(id, color) {
+		if (!hex_elems.hasOwnProperty(id)) {
+			return;
+		}
+		var rails = hex_elems[id].rails;
+		rails.add(new fabric.Rect({
+			height: 15,
+			width:  15,
+			fill:   color,
+		}));
+
+		var total_cnt = rails.size();
+		var row_cnt, row_ind, col_ind;
+		for (col_ind = 0; total_cnt > 0; col_ind += 1) {
+			row_cnt = total_cnt;
+			if (row_cnt > 3) {
+				row_cnt = 3;
+			}
+			for (row_ind = 0; row_ind < row_cnt; row_ind += 1) {
+				rails.item(3*col_ind + row_ind).set({
+					originX: 'center',
+					originY: 'top',
+					top:  20*col_ind,
+					left: 20*row_ind - 10*(row_cnt-1),
+				});
+			}
+			total_cnt -= row_cnt;
+		}
 		canvas.renderAll();
 	}
 
@@ -339,4 +402,12 @@
 		canvas.add(map);
 		add_listeners();
 	});
+
+	module.exports.hex_selected = hex_selected;
+	module.exports.select_hex   = select_hex;
+	module.exports.deselect_hex = deselect_hex;
+
+	module.exports.has_coal   = has_coal;
+	module.exports.mine_coal  = mine_coal;
+	module.exports.build_rail = build_rail;
 })();
