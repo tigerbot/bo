@@ -2,113 +2,14 @@
 	'use strict';
 	var domready = require('domready');
 	var fabric   = require('fabric').fabric;
-	var canvas;
+	var Join     = require('join').Join;
+	var request  = require('./json-request');
 
+	var canvas;
 	var x_sep, y_sep;
 	var water_clr = '#DEEFF7';
 	var grass_clr = '#688E45';
 	var hex_elems = {};
-
-	var initial_state = {
-		'A30': {price: 40, coal: false, city: {name: 'Augusta', color: 'black', revenue: [20, 20, 20, 20, 30, 40]}},
-		'B27': {price: 30, coal: false, city: {name: 'Burlington', color: 'black', revenue: [10, 20, 20, 20, 30, 30]}},
-		'B29': {price: 30, coal: false, city: null},
-		'C22': {price: 10, coal: false, city: null},
-		'C24': {price: 10, coal: false, city: null},
-		'C26': {price: 40, coal: false, city: null},
-		'C28': {price: 20, coal: false, city: {name: 'Concord', color: 'black', revenue: [20, 20, 20, 20, 20, 30]}},
-		'C30': {price: 20, coal: false, city: {name: 'Portsmouth', color: 'black', revenue: [20, 20, 20, 20, 20, 30]}},
-		'D19': {price: 10, coal: false, city: {name: 'Buffalo', color: '#109B1C', revenue: [20, 30, 30, 40, 50, 60]}},
-		'D21': {price: 10, coal: false, city: {name: 'Syracuse', color: '#109B1C', revenue: [10, 20, 20, 30, 30, 40]}},
-		'D23': {price: 10, coal: false, city: {name: 'Utica', color: '#109B1C', revenue: [10, 10, 10, 20, 20, 20]}},
-		'D25': {price: 40, coal: false, city: {name: 'Albany', color: '#109B1C', revenue: [30, 30, 40, 40, 40, 50]}},
-		'D27': {price: 40, coal: false, city: null},
-		'D29': {price: 10, coal: false, city: {name: 'Boston', color: 'black', revenue: [30, 30, 40, 40, 40, 50]}},
-		'E4':  {price: 20, coal: false, city: {name: 'Chicago', color: 'blue', revenue: [20, 30, 50, 70, 90, 100]}},
-		'E8':  {price: 10, coal: false, city: null},
-		'E10': {price: 10, coal: false, city: null},
-		'E12': {price: 10, coal: false, city: {name: 'Detroit', color: 'black', revenue: [20, 30, 40, 60, 80, 90]}},
-		'E16': {price: 10, coal: false, city: null},
-		'E18': {price: 10, coal: false, city: null},
-		'E20': {price: 40, coal: false, city: null},
-		'E22': {price: 40, coal: false, city: null},
-		'E24': {price: 40, coal: false, city: null},
-		'E26': {price: 40, coal: false, city: null},
-		'E28': {price: 10, coal: false, city: {name: 'Hartford', color: 'black', revenue: [20, 20, 20, 30, 30, 30]}},
-		'E30': {price: 20, coal: false, city: {name: 'Providence', color: 'black', revenue: [20, 30, 30, 30, 30, 30]}},
-		'F3':  {price: 10, coal: false, city: null},
-		'F5':  {price: 10, coal: false, city: null},
-		'F7':  {price: 10, coal: false, city: null},
-		'F9':  {price: 10, coal: false, city: null},
-		'F11': {price: 10, coal: false, city: null},
-		'F13': {price: 10, coal: false, city: {name: 'Cleveland', color: 'black', revenue: [20, 30, 40, 50, 60, 60]}},
-		'F15': {price: 10, coal: false, city: null},
-		'F17': {price: 80, coal: false, city: null},
-		'F19': {price: 80, coal: false, city: null},
-		'F21': {price: 60, coal: false, city: null},
-		'F23': {price: 40, coal: false, city: null},
-		'F25': {price: 60, coal: false, city: {name: 'New York', color: '#109B1C', revenue: [30, 40, 50, 60, 70, 80]}},
-		'F27': {price: 10, coal: false, city: {name: 'New Haven', color: 'black', revenue: [20, 20, 30, 30, 30, 40]}},
-		'G2':  {price: 10, coal: false, city: {name: 'Springfield', color: 'black', revenue: [10, 10, 20, 20, 20, 30]}},
-		'G4':  {price: 10, coal: false, city: null},
-		'G6':  {price: 10, coal: false, city: null},
-		'G8':  {price: 10, coal: false, city: {name: 'Fort Wayne', color: 'black', revenue: [10, 20, 20, 30, 40, 50]}},
-		'G10': {price: 10, coal: false, city: null},
-		'G12': {price: 10, coal: false, city: null},
-		'G14': {price: 20, coal: false, city: null},
-		'G16': {price: 60, coal: false, city: {name: 'Pittsburgh', color: 'red', revenue: [20, 30, 40, 60, 70, 80]}},
-		'G18': {price: 80, coal: true,  city: null},
-		'G20': {price: 20, coal: false, city: {name: 'Harrisburg', color: 'red', revenue: [10, 10, 20, 20, 20, 20]}},
-		'G22': {price: 20, coal: false, city: null},
-		'G24': {price: 20, coal: false, city: {name: 'Philadelphia', color: 'red', revenue: [30, 40, 40, 40, 50, 60]}},
-		'H1':  {price: 10, coal: false, city: null},
-		'H3':  {price: 10, coal: false, city: null},
-		'H5':  {price: 10, coal: false, city: null},
-		'H7':  {price: 10, coal: false, city: {name: 'Indianapolis', color: 'black', revenue: [20, 30, 30, 40, 50, 60]}},
-		'H9':  {price: 10, coal: false, city: null},
-		'H11': {price: 10, coal: false, city: null},
-		'H13': {price: 20, coal: false, city: null},
-		'H15': {price: 60, coal: false, city: {name: 'Wheeling', color: 'black', revenue: [20, 20, 30, 40, 50, 60]}},
-		'H17': {price: 60, coal: true,  city: null},
-		'H19': {price: 20, coal: false, city: null},
-		'H21': {price: 10, coal: false, city: null},
-		'H23': {price: 10, coal: false, city: {name: 'Baltimore', color: 'black', revenue: [20, 30, 30, 40, 40, 50]}},
-		'I0':  {price: 40, coal: false, city: {name: 'Saint Louis', color: 'black', revenue: [30, 40, 50, 60, 70, 90]}},
-		'I2':  {price: 10, coal: false, city: null},
-		'I4':  {price: 10, coal: false, city: null},
-		'I6':  {price: 10, coal: false, city: null},
-		'I8':  {price: 10, coal: false, city: null},
-		'I10': {price: 20, coal: false, city: {name: 'Cincinnati', color: 'black', revenue: [30, 40, 50, 50, 60, 70]}},
-		'I12': {price: 40, coal: false, city: null},
-		'I14': {price: 80, coal: false, city: null},
-		'I16': {price:100, coal: true,  city: null},
-		'I18': {price: 80, coal: false, city: null},
-		'I20': {price: 10, coal: false, city: null},
-		'I22': {price: 20, coal: false, city: {name: 'Washington', color: 'black', revenue: [20, 20, 30, 30, 30, 30]}},
-		'I24': {price: 10, coal: false, city: {name: 'Dover', color: 'black', revenue: [10, 10, 10, 20, 20, 20]}},
-		'J1':  {price: 10, coal: false, city: null},
-		'J3':  {price: 10, coal: false, city: null},
-		'J5':  {price: 10, coal: false, city: null},
-		'J7':  {price: 20, coal: false, city: {name: 'Louisville', color: 'black', revenue: [20, 30, 30, 40, 40, 50]}},
-		'J9':  {price: 10, coal: false, city: null},
-		'J11': {price: 40, coal: false, city: null},
-		'J13': {price: 40, coal: false, city: {name: 'Huntington', color: 'black', revenue: [10, 10, 20, 30, 30, 40]}},
-		'J15': {price:100, coal: true,  city: null},
-		'J17': {price: 80, coal: false, city: null},
-		'J19': {price: 20, coal: false, city: null},
-		'J21': {price: 20, coal: false, city: {name: 'Richmond', color: 'black', revenue: [30, 30, 20, 20, 20, 30]}},
-		'K2':  {price: 20, coal: false, city: {name: 'Cairo', color: 'black', revenue: [10, 20, 20, 20, 20, 20]}},
-		'K4':  {price: 10, coal: false, city: null},
-		'K6':  {price: 10, coal: false, city: null},
-		'K8':  {price: 10, coal: false, city: null},
-		'K10': {price: 20, coal: false, city: {name: 'Lexington', color: 'black', revenue: [10, 20, 20, 30, 30, 30]}},
-		'K12': {price:100, coal: false, city: null},
-		'K14': {price: 80, coal: true,  city: null},
-		'K16': {price: 20, coal: false, city: {name: 'Roanoke', color: 'black', revenue: [20, 20, 20, 20, 20, 20]}},
-		'K18': {price: 10, coal: false, city: null},
-		'K20': {price: 10, coal: false, city: null},
-		'K22': {price: 20, coal: false, city: {name: 'Norfolk', color: 'black', revenue: [20, 20, 30, 30, 30, 40]}},
-	};
 
 	function create_rev_bar(revenue) {
 		var rev_opts = {
@@ -131,7 +32,7 @@
 		}));
 	}
 
-	function create_map() {
+	function create_map(hex_background, map_state) {
 		var radius = 50;
 		var border_width = 1.5;
 		var pnts = [0, 1, 2, 3, 4, 5].map(function (index) {
@@ -143,7 +44,7 @@
 		});
 
 		var hex_opts = {
-			fill:    grass_clr,
+			fill:    hex_background,
 			stroke:  'black',
 			strokeWidth: border_width,
 		};
@@ -190,8 +91,8 @@
 		// we divide the width of the pnts by 2 because the IDs only use every other number.
 		x_sep = (pnts[0].x - pnts[3].x + border_width)/2;
 		y_sep = 1.5 * radius;
-		return new fabric.Group(Object.keys(initial_state).map(function (id) {
-			var details = initial_state[id];
+		return new fabric.Group(Object.keys(map_state).map(function (id) {
+			var details = map_state[id];
 			var items = [];
 			var coal = null;
 			var rails;
@@ -316,6 +217,14 @@
 
 		function verify_map_pos() {
 			var map = canvas.item(0);
+
+			if (map.getHeight() < canvas.getHeight() - 2*max_space) {
+				map.scaleToHeight(canvas.getHeight() - 2*max_space);
+			}
+			if (map.getWidth() < canvas.getWidth() - 2*max_space) {
+				map.scaleToWidth(canvas.getWidth() - 2*max_space);
+			}
+
 			if (map.getTop() > max_space) {
 				map.set({ top: max_space });
 			} else if (map.getTop() + map.getHeight() < canvas.getHeight() - max_space) {
@@ -326,6 +235,7 @@
 			} else if (map.getLeft() + map.getWidth() < canvas.getWidth() - max_space) {
 				map.set({ left: canvas.getWidth() - map.getWidth() - max_space });
 			}
+
 			canvas.renderAll();
 		}
 
@@ -367,7 +277,7 @@
 			verify_map_pos();
 		});
 
-		document.getElementById('hex-map-parent').addEventListener('wheel', function board_zoomed(event) {
+		document.getElementById('hex-map-parent').addEventListener('wheel', function (event) {
 			var map = canvas.item(0);
 			var scale = map.scaleX || 1;
 			if (event.wheelDeltaY < 0) {
@@ -376,32 +286,41 @@
 				scale *= 1.1;
 			}
 			map.scale(scale);
-			if (map.getHeight() < canvas.getHeight() - 2*max_space) {
-				map.scaleToHeight(canvas.getHeight() - 2*max_space);
-			}
-			if (map.getWidth() < canvas.getWidth() - 2*max_space) {
-				map.scaleToWidth(canvas.getWidth() - 2*max_space);
-			}
 
 			verify_map_pos();
 		});
+
+		// set it to a really small scale to make sure it will be too small. Then verify_map_pos
+		// will set it to just big enough to fill the entire canvas.
+		canvas.item(0).scale(0.01);
+		verify_map_pos();
 	}
 
-	domready(function () {
-		canvas = new fabric.Canvas('hex-map', {
-			backgroundColor: water_clr,
-			selection: false,
-			height: 650,
-			width: 1050,
+	(function () {
+		var join = new Join();
+		fabric.util.loadImage('hex_background.png', join.add());
+		request('map_state', join.add());
+
+		join.then(function (img_args, map_args) {
+			if (map_args[0]) {
+				console.error('failed to get map state', map_args[0]);
+				return;
+			}
+			var pattern = new fabric.Pattern({ source: img_args[0], repeat: 'repeat' });
+			var map = create_map(pattern, map_args[1]);
+
+			domready(function () {
+				canvas = new fabric.Canvas('hex-map', {
+					backgroundColor: water_clr,
+					selection: false,
+					height: 650,
+					width: 1050,
+				});
+				canvas.add(map);
+				add_listeners();
+			});
 		});
-		var map = create_map(initial_state);
-
-		map.scaleToWidth(canvas.getWidth() - 20);
-		map.set({top: 10, left: 10, selectable: false});
-
-		canvas.add(map);
-		add_listeners();
-	});
+	})();
 
 	module.exports.hex_selected = hex_selected;
 	module.exports.select_hex   = select_hex;
