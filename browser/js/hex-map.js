@@ -123,7 +123,7 @@
 			};
 
 			return group;
-		}));
+		}), {selectable: false, hoverCursor: 'auto'});
 	}
 
 	function hex_selected(id) {
@@ -211,26 +211,34 @@
 	}
 
 	function add_listeners() {
+		var map = canvas.item(0);
 		var max_space = 10;
 		var pressed = false;
 		var time = 0;
 
 		function verify_map_pos() {
-			var map = canvas.item(0);
-
-			if (map.getHeight() < canvas.getHeight() - 2*max_space) {
-				map.scaleToHeight(canvas.getHeight() - 2*max_space);
+			var extra_height = canvas.getHeight() - map.getHeight();
+			var extra_width  = canvas.getWidth()  - map.getWidth();
+			if (extra_width > 2*max_space && extra_height > 2*max_space) {
+				if (extra_width < extra_height) {
+					map.scaleToWidth(canvas.getWidth() - 2*max_space);
+				} else {
+					map.scaleToHeight(canvas.getHeight() - 2*max_space);
+				}
 			}
-			if (map.getWidth() < canvas.getWidth() - 2*max_space) {
-				map.scaleToWidth(canvas.getWidth() - 2*max_space);
-			}
 
-			if (map.getTop() > max_space) {
+			extra_height = canvas.getHeight() - map.getHeight();
+			if (extra_height > 0) {
+				map.set({ top: extra_height/2 });
+			} else if (map.getTop() >= max_space) {
 				map.set({ top: max_space });
 			} else if (map.getTop() + map.getHeight() < canvas.getHeight() - max_space) {
 				map.set({ top: canvas.getHeight() - map.getHeight() - max_space });
 			}
-			if (map.getLeft() > max_space) {
+			extra_width  = canvas.getWidth()  - map.getWidth();
+			if (extra_width > 0) {
+				map.set({ left: extra_width/2 });
+			} else if (map.getLeft() >= max_space) {
 				map.set({ left: max_space });
 			} else if (map.getLeft() + map.getWidth() < canvas.getWidth() - max_space) {
 				map.set({ left: canvas.getWidth() - map.getWidth() - max_space });
@@ -245,7 +253,7 @@
 		});
 		canvas.on('mouse:up', function (event) {
 			pressed = false;
-			if (!event.target || Date.now() - time > 250) {
+			if (event.target !== map || Date.now() - time > 250) {
 				return;
 			}
 			var row = Math.floor(((event.e.clientY - event.target.getTop() ) / event.target.scaleY) / y_sep);
@@ -268,7 +276,6 @@
 			if (!pressed) {
 				return;
 			}
-			var map = canvas.item(0);
 			map.set({
 				top:  map.getTop()  + event.e.movementY,
 				left: map.getLeft() + event.e.movementX,
@@ -278,7 +285,6 @@
 		});
 
 		document.getElementById('hex-map-parent').addEventListener('wheel', function (event) {
-			var map = canvas.item(0);
 			var scale = map.scaleX || 1;
 			if (event.wheelDeltaY < 0) {
 				scale /= 1.1;
@@ -290,9 +296,13 @@
 			verify_map_pos();
 		});
 
-		// set it to a really small scale to make sure it will be too small. Then verify_map_pos
-		// will set it to just big enough to fill the entire canvas.
-		canvas.item(0).scale(0.01);
+		// Try to set the scale such that the entire map can fit into the canvas, then call the
+		// function that will center it however it needs to be.
+		if (canvas.getWidth()/map.getWidth() < canvas.getHeight()/map.getHeight()) {
+			map.scaleToWidth(canvas.getWidth() - 2*max_space);
+		} else {
+			map.scaleToHeight(canvas.getHeight() - 2*max_space);
+		}
 		verify_map_pos();
 	}
 
