@@ -211,6 +211,7 @@
 	}
 
 	function add_listeners() {
+		var parent_elem = document.getElementById('hex-map-parent');
 		var map = canvas.item(0);
 		var max_space = 10;
 		var pressed = false;
@@ -220,7 +221,7 @@
 			var extra_height = canvas.getHeight() - map.getHeight();
 			var extra_width  = canvas.getWidth()  - map.getWidth();
 			if (extra_width > 2*max_space && extra_height > 2*max_space) {
-				if (extra_width < extra_height) {
+				if (canvas.getWidth()/map.getWidth() < canvas.getHeight()/map.getHeight()) {
 					map.scaleToWidth(canvas.getWidth() - 2*max_space);
 				} else {
 					map.scaleToHeight(canvas.getHeight() - 2*max_space);
@@ -256,8 +257,8 @@
 			if (event.target !== map || Date.now() - time > 250) {
 				return;
 			}
-			var row = Math.floor(((event.e.clientY - event.target.getTop() ) / event.target.scaleY) / y_sep);
-			var col = Math.floor(((event.e.clientX - event.target.getLeft()) / event.target.scaleX) / x_sep);
+			var row = Math.floor(((event.e.layerY - event.target.getTop() ) / event.target.scaleY) / y_sep);
+			var col = Math.floor(((event.e.layerX - event.target.getLeft()) / event.target.scaleX) / x_sep);
 
 			if (row % 2 === 0) {
 				col = 2*Math.floor(col/2);
@@ -284,7 +285,7 @@
 			verify_map_pos();
 		});
 
-		document.getElementById('hex-map-parent').addEventListener('wheel', function (event) {
+		parent_elem.onwheel = function (event) {
 			var scale = map.scaleX || 1;
 			if (event.wheelDeltaY < 0) {
 				scale /= 1.1;
@@ -292,18 +293,31 @@
 				scale *= 1.1;
 			}
 			map.scale(scale);
-
 			verify_map_pos();
-		});
+		};
 
-		// Try to set the scale such that the entire map can fit into the canvas, then call the
-		// function that will center it however it needs to be.
-		if (canvas.getWidth()/map.getWidth() < canvas.getHeight()/map.getHeight()) {
-			map.scaleToWidth(canvas.getWidth() - 2*max_space);
-		} else {
-			map.scaleToHeight(canvas.getHeight() - 2*max_space);
-		}
-		verify_map_pos();
+		var resize_canvas = (function () {
+			var timeout_id;
+			function resize() {
+				timeout_id = null;
+				canvas.setWidth(parent_elem.offsetWidth);
+				canvas.setHeight(parent_elem.offsetHeight);
+				verify_map_pos();
+			}
+
+			return function () {
+				if (timeout_id) {
+					clearTimeout(timeout_id);
+				}
+				timeout_id = setTimeout(resize, 50);
+			};
+		})();
+		window.onresize = resize_canvas;
+
+		// Set the scale really small so that after the canvas is sized to be exactly the same as the
+		// parent element it will be expanded to fit the entire area by verify_map_pos.
+		map.scale(0.01);
+		resize_canvas();
 	}
 
 	(function () {
