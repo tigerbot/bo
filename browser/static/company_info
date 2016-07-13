@@ -1,0 +1,132 @@
+{
+	"Pennsylvania": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 16,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Boston & Maine": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 6,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Illinois Central": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 12,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Chesapeake & Ohio": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 22,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"New York Central": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 20,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Baltimore & Ohio": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 18,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"New York, Chicago & Saint Louis": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 10,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Erie": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 14,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"Wabash": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 8,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	},
+	"New York, New Haven & Hartford": {
+		"president": {
+			"name": "Seth",
+			"shares": 10
+		},
+		"stock_price": 171,
+		"held_stock": 0,
+		"net_income": 300,
+		"treasury": 500,
+		"cubes": 4,
+		"coal": 0,
+		"equipment": [1, 1, 1, 1, 1, 1]
+	}
+}

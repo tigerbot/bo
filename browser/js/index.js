@@ -1,4 +1,7 @@
 (function () {
 	'use strict';
-	var hex_map  = require('./hex-map');
+	require('knockout-mapping');
+
+	var hex_map   = require('./hex-map');
+	var companies = require('./companies');
 })();
