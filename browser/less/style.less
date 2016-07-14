@@ -1,4 +1,8 @@
-@company-width: 300px;
+@company-width: 280px;
+
+.money-value::before {
+	content: '$';
+}
 
 #company-list {
 	position: absolute;
@@ -6,7 +10,62 @@
 	bottom: 0px;
 	left: 0px;
 	width: @company-width;
-	overflow-y: scroll;
+	overflow-y: auto;
+
+	.overview {
+		text-shadow: 0 0 8px white;
+		padding: 5px 0px;
+		border: 2px solid black;
+
+		> div:not(.title) {
+			margin-left: 20px;
+		}
+	}
+	.title {
+		padding: 0px 5px;
+		min-height: 36px;
+		border-bottom: 1px solid black;
+		margin-bottom: 5px;
+
+		img {
+			display: inline-block;
+			vertical-align: middle;
+			width: 30px;
+			padding: 3px;
+		}
+		h3 {
+			width: 170px;
+			display: inline-block;
+			vertical-align: middle;
+			text-align: center;
+			margin: 0px 20px;
+		}
+	}
+	.split-row {
+		> span {
+			width: 50%;
+			display: inline-block;
+			font-weight: bold;
+			span {
+				float: right;
+				margin-right: 13px;
+				font-weight: normal;
+			}
+		}
+	}
+	.equipment {
+		margin-top: 3px;
+		div > span {
+			width: 33%;
+			display: inline-block;
+			font-weight: bold;
+			span {
+				float: right;
+				margin-right: 13px;
+				font-weight: normal;
+			}
+		}
+	}
 }
 
 #hex-map-parent {

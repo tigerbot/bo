@@ -6,37 +6,46 @@ html(lang="en")
 		link(href='/style.css', type='text/css', rel='stylesheet', media='screen')
 	body
 		div#company-list(data-bind='foreach: { data: companies }')
-			div.company-overview(data-bind='style: {backgroundColor: color}')
-				div.company-title
+			div.overview(data-bind='style: {backgroundColor: color}')
+				div.title
 					img(data-bind='attr: { src: icon }')
 					h3(data-bind='text: name')
-				div.company-leader
-					span President:
-						span(data-bind='text: _president')
-				div.company-finance
-					span Held Stock:
-						span(data-bind='text: held_stock')
-					span Stock Price:
-						span(data-bind='text: stock_price')
-					span Net Income:
-						span(data-bind='text: net_income')
-				div.company-assets
-					span Treasury:
-						span(data-bind='text: treasury')
-					span Cubes:
-						span(data-bind='text: cubes')
-					span Coal:
-						span(data-bind='text: coal')
-				table.company-equipment
-					tr
-						th 1
-						th 2
-						th 3
-						th 4
-						th 5
-						th 6
-					tr(data-bind='foreach: { data: equipment, as: "count" }')
-						td(data-bind='text: count')
+				div
+					div.split-row
+						span President:
+							span(data-bind='text: president.name')
+						span Shares:
+							span(data-bind='text: president.shares')
+					div.split-row
+						span Stock:
+							span.money-value(data-bind='text: stock_price')
+						span Income:
+							span.money-value(data-bind='text: net_income')
+					div.split-row
+						span Treasury:
+							span.money-value(data-bind='text: treasury')
+						span Held Stock:
+							span(data-bind='text: held_stock')
+					div.split-row
+						span Cubes Left:
+							span(data-bind='text: cubes')
+						span Coal Mined:
+							span(data-bind='text: coal')
+					div.equipment
+						div
+							span Tech 1:
+								span(data-bind='text: equipment.level_1')
+							span Tech 2:
+								span(data-bind='text: equipment.level_2')
+							span Tech 3:
+								span(data-bind='text: equipment.level_3')
+						div
+							span Tech 4:
+								span(data-bind='text: equipment.level_4')
+							span Tech 5:
+								span(data-bind='text: equipment.level_5')
+							span Tech 6:
+								span(data-bind='text: equipment.level_6')
 		//- We put the hex map under a div because the library we are using messes with the element
 		//- in a way that makes it difficult to add listeners for resizing and zooming events.
 		div#hex-map-parent

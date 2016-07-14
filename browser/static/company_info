@@ -10,7 +10,14 @@
 		"treasury": 500,
 		"cubes": 16,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Boston & Maine": {
 		"president": {
@@ -23,7 +30,14 @@
 		"treasury": 500,
 		"cubes": 6,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Illinois Central": {
 		"president": {
@@ -36,7 +50,14 @@
 		"treasury": 500,
 		"cubes": 12,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Chesapeake & Ohio": {
 		"president": {
@@ -49,7 +70,14 @@
 		"treasury": 500,
 		"cubes": 22,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"New York Central": {
 		"president": {
@@ -62,7 +90,14 @@
 		"treasury": 500,
 		"cubes": 20,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Baltimore & Ohio": {
 		"president": {
@@ -75,7 +110,14 @@
 		"treasury": 500,
 		"cubes": 18,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"New York, Chicago & Saint Louis": {
 		"president": {
@@ -88,7 +130,14 @@
 		"treasury": 500,
 		"cubes": 10,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Erie": {
 		"president": {
@@ -101,7 +150,14 @@
 		"treasury": 500,
 		"cubes": 14,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"Wabash": {
 		"president": {
@@ -114,7 +170,14 @@
 		"treasury": 500,
 		"cubes": 8,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	},
 	"New York, New Haven & Hartford": {
 		"president": {
@@ -127,6 +190,13 @@
 		"treasury": 500,
 		"cubes": 4,
 		"coal": 0,
-		"equipment": [1, 1, 1, 1, 1, 1]
+		"equipment": {
+			"level_1": 1,
+			"level_2": 1,
+			"level_3": 1,
+			"level_4": 1,
+			"level_5": 1,
+			"level_6": 1
+		}
 	}
 }
