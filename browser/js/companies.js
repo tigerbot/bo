@@ -18,6 +18,12 @@
 	};
 	var company_list = ko.observableArray();
 
+	function select_company(name) {
+		company_list().forEach(function (view_model) {
+			view_model.selected(name === view_model.name);
+		});
+	}
+
 	request('company_info', function (err, result) {
 		if (err) {
 			console.error('failed to get initial company info', err);
@@ -31,9 +37,16 @@
 			view_model.name = name;
 			view_model.icon = '/logos/'+safe_name+'.png';
 			view_model.color = company_colors[safe_name];
+			view_model.selected = ko.observable(false);
+			view_model.select = select_company.bind(null, name);
 
 			company_list.push(view_model);
 		});
+
+		company_list.sort(function (left, right) {
+			return left.stock_price() - right.stock_price();
+		});
+		company_list()[0].selected(true);
 	});
 	domready(function () {
 		ko.applyBindings({companies: company_list}, document.getElementById("company-list"));

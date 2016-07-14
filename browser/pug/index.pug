@@ -6,21 +6,24 @@ html(lang="en")
 		link(href='/style.css', type='text/css', rel='stylesheet', media='screen')
 	body
 		div#company-list(data-bind='foreach: { data: companies }')
-			div.overview(data-bind='style: {backgroundColor: color}')
+			div.overview(data-bind='style: {backgroundColor: color}, click: select')
 				div.title
 					img(data-bind='attr: { src: icon }')
 					h3(data-bind='text: name')
 				div
+					// ko if: selected
 					div.split-row
 						span President:
 							span(data-bind='text: president.name')
 						span Shares:
 							span(data-bind='text: president.shares')
+					// /ko
 					div.split-row
 						span Stock:
 							span.money-value(data-bind='text: stock_price')
 						span Income:
 							span.money-value(data-bind='text: net_income')
+					// ko if: selected
 					div.split-row
 						span Treasury:
 							span.money-value(data-bind='text: treasury')
@@ -46,6 +49,7 @@ html(lang="en")
 								span(data-bind='text: equipment.level_5')
 							span Tech 6:
 								span(data-bind='text: equipment.level_6')
+					// /ko
 		//- We put the hex map under a div because the library we are using messes with the element
 		//- in a way that makes it difficult to add listeners for resizing and zooming events.
 		div#hex-map-parent
