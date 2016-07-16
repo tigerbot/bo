@@ -24,6 +24,20 @@
 		});
 	}
 
+	function sort_companies() {
+		company_list.sort(function (left, right) {
+			var price_diff = right.stock_price() - left.stock_price();
+			if (price_diff !== 0) {
+				return price_diff;
+			}
+			if (right.price_changed() < left.price_changed()) {
+				return 1;
+			} else {
+				return -1;
+			}
+		});
+	}
+
 	request('company_info', function (err, result) {
 		if (err) {
 			console.error('failed to get initial company info', err);
@@ -43,9 +57,7 @@
 			company_list.push(view_model);
 		});
 
-		company_list.sort(function (left, right) {
-			return left.stock_price() - right.stock_price();
-		});
+		sort_companies();
 		company_list()[0].selected(true);
 	});
 	domready(function () {
