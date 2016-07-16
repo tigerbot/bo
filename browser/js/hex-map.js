@@ -2,7 +2,6 @@
 	'use strict';
 	var domready = require('domready');
 	var fabric   = require('fabric').fabric;
-	var Join     = require('join').Join;
 	var common   = require('./common');
 
 	var canvas;
@@ -11,8 +10,23 @@
 	var grass_clr = '#688E45';
 	var hex_elems = {};
 
-	function create_rev_bar(revenue) {
-		var rev_opts = {
+	function create_city(city_info) {
+		var city_name_opts = {
+			fontSize:    15,
+			fontWeight:  'bold',
+			shadow:      'white 0 0 2px',
+			originX:     'center',
+			originY:     'bottom',
+			left:        0,
+			top:         -2,
+		};
+		var rev_bar_opts = {
+			originX: 'center',
+			originY: 'top',
+			left:    0,
+			top:     0,
+		};
+		var rev_item_opts = {
 			fontSize:  12,
 			textAlign: 'center',
 			originY:   'center',
@@ -20,31 +34,62 @@
 			height:    15,
 			width:     17,
 		};
-		var clrs = [{fill: 'white'}, {fill: 'black'}];
+		var colors = [{fill: 'white'}, {fill: 'black'}];
 
-		return new fabric.Group(revenue.map(function (value, index) {
-			var txt = new fabric.Text(value.toString(), rev_opts);
-			var bg  = new fabric.Rect(rev_opts);
+		var city_name = new fabric.Text(city_info.name, city_name_opts);
+		var rev_bar = new fabric.Group(city_info.revenue.map(function (value, index) {
+			var txt = new fabric.Text(value.toString(), rev_item_opts);
+			var bg  = new fabric.Rect(rev_item_opts);
 
-			txt.set(clrs[(index+0) % 2]);
-			bg.set( clrs[(index+1) % 2]);
-			return new fabric.Group([bg, txt], {originY: 'bottom', left: index*rev_opts.width});
-		}));
+			txt.set(colors[(index+0) % 2]);
+			bg.set( colors[(index+1) % 2]);
+			return new fabric.Group([bg, txt], {originY: 'bottom', left: index*rev_item_opts.width});
+		}), rev_bar_opts);
+
+		if (city_name.getWidth() > rev_bar.getWidth()) {
+			city_name.scaleToWidth(rev_bar.getWidth());
+		}
+		if (city_info.exception) {
+			if (city_info.exception.toLowerCase() === "universal") {
+				city_name.set({ fill: "blue" });
+			} else {
+				city_name.set({
+					fill:   common.get_company_color(city_info.exception),
+					shadow: 'black 0 0 2px',
+				});
+			}
+		}
+
+		var result = new fabric.Group([rev_bar, city_name]);
+		if (city_info.starting) {
+			fabric.Image.fromURL(common.get_company_logo(city_info.starting), function (logo) {
+				logo.scaleToWidth(0.45*result.getWidth());
+				logo.set({
+					originY: 'bottom',
+					originX: 'center',
+					left:    0,
+					top:     -0.7*result.getHeight(),
+				});
+				result.add(logo);
+			});
+		}
+
+		return result;
 	}
 
-	function create_map(hex_background, map_state) {
+	function create_map(map_state) {
 		var radius = 50;
 		var border_width = 1.5;
 		var pnts = [0, 1, 2, 3, 4, 5].map(function (index) {
 			var angle = (2*index + 1)*Math.PI/6;
 			return {
-				x: Math.round(1000*(radius - border_width/2)*(1 + Math.cos(angle)))/1000,
-				y: Math.round(1000*(radius - border_width/2)*(1 + Math.sin(angle)))/1000,
+				x: Math.round(100*(radius + (radius-border_width/2)*Math.cos(angle)))/100,
+				y: Math.round(100*(radius + (radius-border_width/2)*Math.sin(angle)))/100,
 			};
 		});
 
 		var hex_opts = {
-			fill:    hex_background,
+			fill:    new fabric.Pattern({source: '/hex_background.png', repeat: 'repeat' }),
 			stroke:  'black',
 			strokeWidth: border_width,
 		};
@@ -56,6 +101,12 @@
 			top:       1.82*radius,
 			left:      radius,
 		};
+		var city_opts = {
+			originX: 'center',
+			originY: 'bottom',
+			top:     pnts[0].y,
+			left:    radius,
+		};
 		var coal_opts = {
 			fontSize:  13,
 			textAlign: 'center',
@@ -66,25 +117,10 @@
 			fill:      'white',
 			backgroundColor: 'black',
 		};
-		var city_opts = {
-			fontSize:    15,
-			fontWeight:  'bold',
-			shadow:      'white 0 0 2px',
-			originX:     'center',
-			originY:     'bottom',
-			top:         radius*1.2,
-			left:        radius,
-		};
-		var rev_bar_opts = {
-			originX: 'center',
-			originY: 'top',
-			top:     radius*1.25,
-			left:    radius,
-		};
 		var rails_opts = {
 			originX: 'center',
 			originY: 'top',
-			top:     pnts[1].y - pnts[0].y,
+			top:     pnts[5].y,
 			left:    radius,
 		};
 
@@ -104,8 +140,7 @@
 				items.push(coal);
 			}
 			if (details.city) {
-				items.push(create_rev_bar(details.city.revenue).scaleToWidth(1.85*x_sep).set(rev_bar_opts));
-				items.push((new fabric.Text(details.city.name, city_opts)).set({fill: details.city.color}));
+				items.push(create_city(details.city).scaleToWidth(1.85*x_sep).set(city_opts));
 			}
 			rails = new fabric.Group([], rails_opts);
 			items.push(rails);
@@ -309,7 +344,7 @@
 				if (timeout_id) {
 					clearTimeout(timeout_id);
 				}
-				timeout_id = setTimeout(resize, 50);
+				timeout_id = setTimeout(resize, 150);
 			};
 		})();
 		window.onresize = resize_canvas;
@@ -321,17 +356,12 @@
 	}
 
 	(function () {
-		var join = new Join();
-		fabric.util.loadImage('hex_background.png', join.add());
-		common.request('map_state', join.add());
-
-		join.then(function (img_args, map_args) {
-			if (map_args[0]) {
-				console.error('failed to get map state', map_args[0]);
+		common.request('map_state', function (err, map_state) {
+			if (err) {
+				console.error('failed to get map state', err);
 				return;
 			}
-			var pattern = new fabric.Pattern({ source: img_args[0], repeat: 'repeat' });
-			var map = create_map(pattern, map_args[1]);
+			var map = create_map(map_state);
 
 			domready(function () {
 				canvas = new fabric.Canvas('hex-map', {
