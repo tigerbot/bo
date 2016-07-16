@@ -54,3 +54,27 @@ html(lang="en")
 		//- in a way that makes it difficult to add listeners for resizing and zooming events.
 		div#hex-map-parent
 			canvas#hex-map
+		div#player-list(data-bind='foreach: { data: players }')
+			div.overview(data-bind='click: select')
+				div.title
+					h3(data-bind='text: name')
+				div.split-row
+					span Cash:
+						span.money-value(data-bind='text: cash')
+					span Total:
+						span.money-value(data-bind='text: net_worth')
+				// ko if: selected
+				div.stocks
+					table
+						tr
+							th Company
+							th Count
+							th Pres
+						// ko foreach: { data: stock_list }
+						tr(data-bind='style: {backgroundColor: color}')
+							td(data-bind='text: name')
+							td(data-bind='text: count')
+							td(data-bind='text: president')
+						// /ko
+
+				// /ko

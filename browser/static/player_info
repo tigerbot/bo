@@ -1,0 +1,98 @@
+{
+	"Player 1": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	},
+	"Player 2": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	},
+	"Player 3": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	},
+	"Player 4": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	},
+	"Player 5": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	},
+	"Player 6": {
+		"cash": 400,
+		"net_worth": 1500,
+		"stocks": {
+			"Pennsylvania":                    { "count": 10, "president": true },
+			"Boston & Maine":                  { "count": 9,  "president": true },
+			"Illinois Central":                { "count": 8,  "president": true },
+			"Chesapeake & Ohio":               { "count": 8,  "president": true },
+			"New York Central":                { "count": 7,  "president": true },
+			"Baltimore & Ohio":                { "count": 6,  "president": true },
+			"New York, Chicago & Saint Louis": { "count": 5,  "president": true },
+			"Erie":                            { "count": 4,  "president": true },
+			"Wabash":                          { "count": 3,  "president": true },
+			"New York, New Haven & Hartford":  { "count": 1,  "president": false }
+		}
+	}
+}

@@ -1,4 +1,5 @@
 @company-width: 280px;
+@player-width: 290px;
 
 .money-value::before {
 	content: '$';
@@ -73,5 +74,14 @@
 	top: 0px;
 	bottom: 0px;
 	left: @company-width;
+	right: @player-width;
+}
+
+#player-list {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
 	right: 0px;
+	width: @player-width;
+	overflow-y: auto;
 }
