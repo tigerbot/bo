@@ -3,7 +3,7 @@
 	var domready = require('domready');
 	var fabric   = require('fabric').fabric;
 	var Join     = require('join').Join;
-	var request  = require('./json-request');
+	var common   = require('./common');
 
 	var canvas;
 	var x_sep, y_sep;
@@ -323,7 +323,7 @@
 	(function () {
 		var join = new Join();
 		fabric.util.loadImage('hex_background.png', join.add());
-		request('map_state', join.add());
+		common.request('map_state', join.add());
 
 		join.then(function (img_args, map_args) {
 			if (map_args[0]) {
