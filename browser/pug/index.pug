@@ -66,15 +66,12 @@ html(lang="en")
 				// ko if: selected
 				div.stocks
 					table
-						tr
-							th Company
-							th Count
-							th Pres
-						// ko foreach: { data: stock_list }
-						tr(data-bind='style: {backgroundColor: color}')
-							td(data-bind='text: name')
-							td(data-bind='text: count')
-							td(data-bind='text: president')
-						// /ko
-
+						tbody
+							// ko foreach: { data: stock_list }
+							tr(data-bind='style: {backgroundColor: color}, if: count')
+								th(data-bind='text: name')
+								td
+									span(data-bind='text: count')
+									span(data-bind='if: president') &nbsp;-&nbsp;Pres
+							// /ko
 				// /ko

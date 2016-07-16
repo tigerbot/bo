@@ -4,15 +4,15 @@
 
 
 	var company_colors = {
-		'pennsylvania':                 'rgb(255,  48,  48)',
+		'pennsylvania':                 'rgb(255,  80,  80)',
 		'boston_maine':                 'rgb(255, 128, 192)',
 		'illinois_central':             'rgb(255, 128,   0)',
 		'chesapeake_ohio':              'rgb(248, 248,   7)',
 		'new_york_central':             'rgb( 64, 224,  96)',
-		'baltimore_ohio':               'rgb(  0, 128, 255)',
-		'new_york_chicago_saint_louis': 'rgb(128,  64, 255)',
+		'baltimore_ohio':               'rgb( 64, 160, 255)',
+		'new_york_chicago_saint_louis': 'rgb(144,  96, 255)',
 		'erie':                         'rgb(160,  80,  0)',
-		'wabash':                       'rgb(100, 100, 100)',
+		'wabash':                       'rgb(128, 128, 128)',
 		'new_york_new_haven_hartford':  'rgb(255, 255, 255)',
 	};
 

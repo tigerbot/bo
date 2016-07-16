@@ -6,8 +6,6 @@
 
 	var canvas;
 	var x_sep, y_sep;
-	var water_clr = '#DEEFF7';
-	var grass_clr = '#688E45';
 	var hex_elems = {};
 
 	function create_city(city_info) {
@@ -365,7 +363,6 @@
 
 			domready(function () {
 				canvas = new fabric.Canvas('hex-map', {
-					backgroundColor: water_clr,
 					selection: false,
 					height: 650,
 					width: 1050,
