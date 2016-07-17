@@ -1,5 +1,9 @@
 node_modules/
 public/
+pkg/
+bin/
+src/github.com/
+src/bo_server/bindata.go
 
 # Windows image file caches
 Thumbs.db
