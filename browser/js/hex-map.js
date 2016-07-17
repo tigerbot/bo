@@ -7,6 +7,14 @@
 	var canvas;
 	var x_sep, y_sep;
 	var hex_elems = {};
+	var hex_bg = new fabric.Pattern({ source: fabric.util.createImage, repeat: 'repeat' });
+
+	fabric.util.loadImage('/hex_background.png', function (img) {
+		hex_bg.source = img;
+		if (canvas) {
+			canvas.renderAll();
+		}
+	});
 
 	function create_city(city_info) {
 		var city_name_opts = {
@@ -69,6 +77,9 @@
 					top:     -0.7*result.getHeight(),
 				});
 				result.add(logo);
+				if (canvas) {
+					canvas.renderAll();
+				}
 			});
 		}
 
@@ -87,12 +98,12 @@
 		});
 
 		var hex_opts = {
-			fill:    new fabric.Pattern({source: '/hex_background.png', repeat: 'repeat' }),
+			fill:    hex_bg,
 			stroke:  'black',
 			strokeWidth: border_width,
 		};
 		var price_opts = {
-			fontSize:  12,
+			fontSize:  radius/4,
 			textAlign: 'center',
 			originX:   'center',
 			originY:   'bottom',
@@ -106,7 +117,7 @@
 			left:    radius,
 		};
 		var coal_opts = {
-			fontSize:  13,
+			fontSize:  radius/4,
 			textAlign: 'center',
 			originX:   'center',
 			originY:   'top',
