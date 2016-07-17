@@ -86,7 +86,7 @@
 		return result;
 	}
 
-	function create_map(map_state) {
+	function create_map(board_info) {
 		var radius = 50;
 		var border_width = 1.5;
 		var pnts = [0, 1, 2, 3, 4, 5].map(function (index) {
@@ -102,7 +102,7 @@
 			stroke:  'black',
 			strokeWidth: border_width,
 		};
-		var price_opts = {
+		var cost_opts = {
 			fontSize:  radius/4,
 			textAlign: 'center',
 			originX:   'center',
@@ -136,14 +136,14 @@
 		// we divide the width of the pnts by 2 because the IDs only use every other number.
 		x_sep = (pnts[0].x - pnts[3].x + border_width)/2;
 		y_sep = 1.5 * radius;
-		return new fabric.Group(Object.keys(map_state).map(function (id) {
-			var details = map_state[id];
+		return new fabric.Group(Object.keys(board_info).map(function (id) {
+			var details = board_info[id];
 			var items = [];
 			var coal = null;
 			var rails;
 
 			items.push(new fabric.Polygon(pnts, hex_opts));
-			items.push(new fabric.Text('$'+details.price, price_opts));
+			items.push(new fabric.Text('$'+details.build_cost, cost_opts));
 			if (details.coal) {
 				coal = new fabric.Text('COAL', coal_opts);
 				items.push(coal);
@@ -365,12 +365,12 @@
 	}
 
 	(function () {
-		common.request('map_state', function (err, map_state) {
+		common.request('/board_info', function (err, board_info) {
 			if (err) {
 				console.error('failed to get map state', err);
 				return;
 			}
-			var map = create_map(map_state);
+			var map = create_map(board_info);
 
 			domready(function () {
 				canvas = new fabric.Canvas('hex-map', {
