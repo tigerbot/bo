@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
 	head
-		title="Baltimore and Ohio"
+		title="Baltimore & Ohio"
 		script(src='/index.js', type='text/javascript')
 		link(href='/style.css', type='text/css', rel='stylesheet', media='screen')
 	body
@@ -10,46 +10,40 @@ html(lang="en")
 				div.title
 					img(data-bind='attr: { src: icon }')
 					h3(data-bind='text: name')
-				div
-					// ko if: selected
-					div.split-row
-						span President:
-							span(data-bind='text: president.name')
-						span Shares:
-							span(data-bind='text: president.shares')
-					// /ko
-					div.split-row
-						span Stock:
-							span.money-value(data-bind='text: stock_price')
-						span Income:
-							span.money-value(data-bind='text: net_income')
-					// ko if: selected
-					div.split-row
-						span Treasury:
-							span.money-value(data-bind='text: treasury')
-						span Held Stock:
-							span(data-bind='text: held_stock')
-					div.split-row
-						span Cubes Left:
-							span(data-bind='text: cubes')
-						span Coal Mined:
-							span(data-bind='text: coal')
-					div.equipment
-						div
-							span Tech 1:
-								span(data-bind='text: equipment.level_1')
-							span Tech 2:
-								span(data-bind='text: equipment.level_2')
-							span Tech 3:
-								span(data-bind='text: equipment.level_3')
-						div
-							span Tech 4:
-								span(data-bind='text: equipment.level_4')
-							span Tech 5:
-								span(data-bind='text: equipment.level_5')
-							span Tech 6:
-								span(data-bind='text: equipment.level_6')
-					// /ko
+				// ko if: selected
+				div.leader
+					span President:
+						span(data-bind='text: president() || "Unstarted"')
+				// /ko
+				div.split-row
+					span Stock:
+						span.money-value(data-bind='text: stock_price() || " --"')
+					span Income:
+						span.money-value(data-bind='text: net_income() || " --"')
+				// ko if: selected
+				div.split-row
+					span Treasury:
+						span.money-value(data-bind='text: treasury')
+					span Held Stock:
+						span(data-bind='text: held_stock')
+				div.split-row
+					span Cubes Left:
+						span(data-bind='text: unbuilt_track')
+					span Coal Mined:
+						span(data-bind='text: coal_mined')
+				div.equipment
+					table
+						tr
+							th Equipment
+							th Count
+							th Capacity
+						// ko foreach: { data: equipment_list }
+						tr
+							th(data-bind='text: name')
+							td(data-bind='text: count')
+							td(data-bind='text: capacity')
+						// /ko
+				// /ko
 		//- We put the hex map under a div because the library we are using messes with the element
 		//- in a way that makes it difficult to add listeners for resizing and zooming events.
 		div#hex-map-parent
@@ -65,13 +59,12 @@ html(lang="en")
 						span.money-value(data-bind='text: net_worth')
 				// ko if: selected
 				div.stocks
+					div Stock Options:
 					table
 						tbody
 							// ko foreach: { data: stock_list }
 							tr(data-bind='style: {backgroundColor: color}, if: count')
 								th(data-bind='text: name')
-								td
-									span(data-bind='text: count')
-									span(data-bind='if: president') &nbsp;-&nbsp;Pres
+								td(data-bind='text: count')
 							// /ko
 				// /ko

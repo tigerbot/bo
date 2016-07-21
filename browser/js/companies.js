@@ -26,7 +26,33 @@
 		});
 	}
 
-	common.request('company_info', function (err, result) {
+	function convert_equipment() {
+		// jshint validthis:true
+		var result = this.equipment();
+
+		result = result.map(function (count, index) {
+			var level = index + 1;
+			return {
+				name:     'Tech ' + level,
+				count:    count,
+				capacity: count * level,
+			};
+		});
+
+		result = result.filter(function (obj) {
+			return obj.count > 0;
+		});
+
+		result.push(result.reduce(function (total, next) {
+			total.count    += next.count;
+			total.capacity += next.capacity;
+			return total;
+		}, {name: 'Total', count: 0, capacity: 0}));
+
+		return result;
+	}
+
+	common.request('companies', function (err, result) {
 		if (err) {
 			console.error('failed to get initial company info', err);
 			return;
@@ -40,6 +66,7 @@
 			view_model.color = common.get_company_color(name);
 			view_model.selected = ko.observable(false);
 			view_model.select = select_company.bind(null, name);
+			view_model.equipment_list = ko.computed(convert_equipment, view_model);
 
 			company_list.push(view_model);
 		});

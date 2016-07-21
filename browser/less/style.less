@@ -3,6 +3,7 @@
 
 body {
 	background-color: rgb(222, 239, 247);
+	overflow: hidden;
 }
 
 .shadow-gradient {
@@ -82,16 +83,34 @@ body {
 			margin: 0px 20px;
 		}
 	}
-	.equipment {
-		margin-top: 3px;
-		div > span {
-			width: 33%;
-			display: inline-block;
+	.leader {
+		font-size: 1.1em;
+		> span {
 			font-weight: bold;
 			span {
-				float: right;
 				margin-right: 13px;
+				float: right;
 				font-weight: normal;
+			}
+		}
+	}
+	.equipment {
+		table {
+			border-spacing: 0px 2px;
+			tr:first-child * {
+				min-width: 75px;
+				border-bottom: 2px solid black;
+			}
+			tr:not(:first-child) {
+				th {
+					text-align: left;
+				}
+				td {
+					text-align: center;
+				}
+			}
+			tr:last-child  * {
+				border-top: 1px solid black;
 			}
 		}
 	}
@@ -132,8 +151,11 @@ body {
 	}
 
 	.stocks {
-		margin-top: 15px;
+		> div {
+			font-weight: bold;
+		}
 		table {
+			margin-left: 15px;
 			border: 2px solid black;
 			border-spacing: 0px;
 			border-collapse: collapse;
@@ -150,7 +172,7 @@ body {
 			width: 140px;
 		}
 		td {
-			width: 60px;
+			width: 40px;
 		}
 	}
 }

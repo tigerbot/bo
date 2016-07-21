@@ -23,7 +23,7 @@
 		});
 	}
 
-	common.request('player_info', function (err, result) {
+	common.request('players', function (err, result) {
 		if (err) {
 			console.error('failed to get initial player info', err);
 			return;
@@ -37,8 +37,7 @@
 				return {
 					name:      name,
 					color:     common.get_company_color(name),
-					count:     view_model.stocks[name].count,
-					president: view_model.stocks[name].president,
+					count:     view_model.stocks[name],
 				};
 			}));
 			view_model.selected = ko.observable(false);
