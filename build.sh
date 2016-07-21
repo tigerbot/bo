@@ -10,15 +10,56 @@ unset GOBIN
 # allow us to directly use the go utilities we install here
 export PATH="${GOPATH}/bin:${PATH}"
 
-# first build the public directory
-pushd $GOPATH/browser
-npm install
-popd
+_dev=false
 
-# then conver the public directory into a go
+function usage() {
+  echo -e "Usage:\tbuild.sh [flags...]\n"
+  echo "The flags are:"
+  echo "  -h, --help        show this help message and quit"
+  echo "  -d, --dev         don't run gulp, run go-bindata with, start the server"
+}
+
+function set_args() {
+  while [ "${1:-}" != "" ]; do
+    case $1 in
+      "-h" | "--help")
+        usage
+        exit 0
+        ;;
+      "-d" | "--dev")
+        shift
+        _dev=true
+        flag="-debug"
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        echo "Unrecognized argument: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+set_args "$@"
+
+# first build the public directory (unless we are in dev mode, in which case we'll just call
+# gulp manually when needed)
+if ! $_dev; then
+	pushd $GOPATH/browser
+	npm install
+	popd
+fi
+
+# then package the public directory into a go file in the main package.
 go get -u github.com/jteeuwen/go-bindata/...
-go-bindata -o "${GOPATH}/src/bo_server/bindata.go" -prefix "${GOPATH}/public" "${GOPATH}/public/..."
+go-bindata ${flag:-} -o "${GOPATH}/src/bo_server/bindata.go" -prefix "${GOPATH}/public" "${GOPATH}/public/..."
 
 go get bo_server
 
-bo_server
+if $_dev; then
+	bo_server
+fi
