@@ -29,6 +29,7 @@ func NewGame(playerNames []string) *Game {
 	result.Companies = make(map[string]*Company, len(companyInitCond))
 	for name, start := range companyInitCond {
 		result.Companies[name] = new(Company)
+		result.Companies[name].Name = name
 		result.Companies[name].HeldStock = 10
 		result.Companies[name].Restricted = start.tech3
 		result.Companies[name].PriceChange = start.sort
@@ -48,6 +49,7 @@ func NewGame(playerNames []string) *Game {
 	result.Players = make(map[string]*Player, len(playerNames))
 	for _, name := range playerNames {
 		result.Players[name] = new(Player)
+		result.Players[name].Name = name
 		result.Players[name].Cash = startingCash
 		result.Players[name].Stocks = map[string]int{}
 		result.Players[name].NetWorth = startingCash
