@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/elazarl/go-bindata-assetfs"
@@ -63,6 +62,5 @@ func main() {
 	r.HandleFunc("/players", getPlayers)
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(staticFS)))
 
-	fmt.Println("Hello World!")
 	http.ListenAndServe(":8000", r)
 }

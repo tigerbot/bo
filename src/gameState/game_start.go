@@ -1,10 +1,5 @@
 package gameState
 
-type Game struct {
-	Companies map[string]*Company
-	Players   map[string]*Player
-}
-
 var companyInitCond = map[string]struct {
 	tech3  bool
 	sort   string
@@ -25,6 +20,11 @@ var companyInitCond = map[string]struct {
 
 func NewGame(playerNames []string) *Game {
 	result := new(Game)
+
+	result.GlobalState.Round = 1
+	result.GlobalState.Phase = 1
+	result.GlobalState.TechLevel = 1
+	result.GlobalState.UnminedCoal = []string{"G18", "H17", "I16", "J15", "K14"}
 
 	result.Companies = make(map[string]*Company, len(companyInitCond))
 	for name, start := range companyInitCond {
@@ -50,6 +50,7 @@ func NewGame(playerNames []string) *Game {
 		result.Players[name] = new(Player)
 		result.Players[name].Cash = startingCash
 		result.Players[name].Stocks = map[string]int{}
+		result.Players[name].NetWorth = startingCash
 	}
 
 	return result

@@ -61,5 +61,6 @@ go-bindata ${flag:-} -o "${GOPATH}/src/bo_server/bindata.go" -prefix "${GOPATH}/
 go get bo_server
 
 if $_dev; then
+	echo "starting server"
 	bo_server
 fi
