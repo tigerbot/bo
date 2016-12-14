@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+
+	"boardInfo"
 )
 
 func (g *GlobalState) timeString() string {
@@ -56,6 +58,12 @@ func (g *Game) endMarketTurn(pass bool) {
 	if !pass {
 		g.passes = 0
 	} else if g.passes += 1; g.passes == len(g.turnOrder) {
+		// Any companies that have orphaned stock by the end of the market phase have their stock
+		// prices reduced.
+		for name, _ := range g.OrphanStocks {
+			company := g.Companies[name]
+			company.StockPrice = boardInfo.PrevStockPrice(company.StockPrice)
+		}
 		g.beginBusinessPhase()
 	}
 }

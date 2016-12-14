@@ -89,17 +89,30 @@ func (g *Game) startCompany(player *Player, company *Company, count, price int) 
 
 func (g *Game) buyStock(player *Player, company *Company, count int) error {
 	price := count * company.StockPrice
-	if count > company.HeldStock {
-		return fmt.Errorf("%s only has %d shares remaining", company.Name, company.HeldStock)
+	if available := company.HeldStock + g.OrphanStocks[company.Name]; count > available {
+		return fmt.Errorf("%s only has %d shares remaining", company.Name, available)
 	} else if price > player.Cash {
 		return fmt.Errorf("%s has insufficient cash for %d shares of %s",
 			player.Name, count, company.Name)
 	}
 	player.Cash -= price
-	company.Treasury += price
-
-	company.HeldStock -= count
 	player.Stocks[company.Name] += count
+
+	// If this company has any orphaned stock then purchase that before we start cutting into the
+	// companies holding. (No need to let the player chose, doing otherwise is throwing money away.)
+	if g.OrphanStocks[company.Name] > 0 {
+		if count >= g.OrphanStocks[company.Name] {
+			count -= g.OrphanStocks[company.Name]
+			delete(g.OrphanStocks, company.Name)
+		} else {
+			g.OrphanStocks[company.Name] -= count
+			count = 0
+		}
+		price = count * price
+	}
+	company.Treasury += price
+	company.HeldStock -= count
+
 	if company.President == "" ||
 		g.Players[company.President].Stocks[company.Name] < player.Stocks[company.Name] {
 		company.President = player.Name
