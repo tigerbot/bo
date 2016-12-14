@@ -17,6 +17,7 @@ function usage() {
   echo "The flags are:"
   echo "  -h, --help        show this help message and quit"
   echo "  -d, --dev         don't run gulp, run go-bindata with, start the server"
+  echo "  -v, --verbose     show additional output"
 }
 
 function set_args() {
@@ -30,6 +31,11 @@ function set_args() {
         shift
         _dev=true
         flag="-debug"
+        ;;
+      "-v" | "--verbose")
+        shift
+        set -x
+        v_flag="-v"
         ;;
       --)
         shift
@@ -55,10 +61,14 @@ if ! $_dev; then
 fi
 
 # then package the public directory into a go file in the main package.
-go get -u github.com/jteeuwen/go-bindata/...
+go get ${v_flag:-} -u github.com/jteeuwen/go-bindata/...
 go-bindata ${flag:-} -o "${GOPATH}/src/bo_server/bindata.go" -prefix "${GOPATH}/public" "${GOPATH}/public/..."
 
-go get bo_server
+if !_dev; then
+  ${GOPATH}/test.sh ${v_flag}
+fi
+
+go get ${v_flag:-} bo_server
 
 if $_dev; then
 	echo "starting server"
