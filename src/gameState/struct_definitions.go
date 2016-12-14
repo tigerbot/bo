@@ -1,31 +1,18 @@
 package gameState
 
-import (
-	"fmt"
-)
-
 // The GlobalState struct holds all general board game state.
 type GlobalState struct {
 	Round int `json:"round"`
 	Phase int `json:"phase"`
-	turn  int `json:"-"`
+
+	turnOrder []string `json:"-"`
+	turn      int      `json:"-"`
+	passes    int      `json:"-"`
 
 	TrainsBought int            `json:"trains_bought"`
 	TechLevel    int            `json:"tech_level"`
 	UnminedCoal  []string       `json:"unmined_coal"`
 	OrphanStocks map[string]int `json:"orphan_stocks"`
-}
-
-func (g *GlobalState) marketPhase() bool {
-	return g.Phase == 1
-}
-func (g *GlobalState) businessPhase() bool {
-	return g.Phase == 2 || g.Phase == 3
-}
-func (g *GlobalState) timeString() string {
-	result := fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.turn)
-	g.turn += 1
-	return result
 }
 
 // The Company struct holds all of the information relevant to a single company.
@@ -55,7 +42,7 @@ type Player struct {
 }
 
 type Game struct {
-	GlobalState GlobalState
-	Companies   map[string]*Company
-	Players     map[string]*Player
+	GlobalState
+	Companies map[string]*Company
+	Players   map[string]*Player
 }

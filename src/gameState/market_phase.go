@@ -12,14 +12,24 @@ type MarketAction struct {
 	Price   int    `json:"price,omitempty"`
 }
 
-func (g *Game) PerformMarketAction(playerName string, action MarketAction) error {
-	if !g.GlobalState.marketPhase() {
+func (g *Game) PerformMarketAction(playerName string, action MarketAction) (err error) {
+	defer func() {
+		// If there was no error when we returned that means this action succeeded and its the
+		// next player's turn.
+		if err != nil {
+			g.endMarketTurn(action.Count == 0)
+		}
+	}()
+
+	if !g.marketPhase() {
 		return fmt.Errorf("Must be in market phase to perform market actions")
 	}
 
 	player := g.Players[playerName]
 	if player == nil {
 		return fmt.Errorf("No player with name %q", playerName)
+	} else if expected := g.currentTurn(); playerName != expected {
+		return fmt.Errorf("It is currently player %s's turn", expected)
 	}
 
 	if action.Company == "" || action.Count == 0 {
@@ -28,7 +38,6 @@ func (g *Game) PerformMarketAction(playerName string, action MarketAction) error
 		} else if action.Company != "" {
 			return fmt.Errorf("Cannot buy/sell 0 stocks in %s", action.Company)
 		}
-		// TODO: handle passing and allow market phase to end
 		return nil
 	}
 
@@ -54,17 +63,16 @@ func (g *Game) PerformMarketAction(playerName string, action MarketAction) error
 }
 
 func (g *Game) startCompany(player *Player, company *Company, count, price int) error {
-	if company.Restricted && g.GlobalState.TechLevel < 3 {
+	if company.Restricted && g.TechLevel < 3 {
 		return fmt.Errorf("%s locked until tech level 3", company.Name)
 	}
 
 	validPrice := false
-	for _, option := range boardInfo.StartingStockPrices(g.GlobalState.TechLevel) {
+	for _, option := range boardInfo.StartingStockPrices(g.TechLevel) {
 		validPrice = validPrice || price == option
 	}
 	if !validPrice {
-		return fmt.Errorf("%d invalid starting price for tech level %d",
-			price, g.GlobalState.TechLevel)
+		return fmt.Errorf("%d invalid starting price for tech level %d", price, g.TechLevel)
 	}
 
 	// Initial the price, then re-use the code in the buy function, clearing the stock price
@@ -75,7 +83,7 @@ func (g *Game) startCompany(player *Player, company *Company, count, price int) 
 		return err
 	}
 
-	company.PriceChange = g.GlobalState.timeString()
+	company.PriceChange = g.timeString()
 	return nil
 }
 
@@ -107,7 +115,7 @@ func (g *Game) sellStock(player *Player, company *Company, count int) error {
 	}
 	player.Cash += count * company.StockPrice
 
-	g.GlobalState.OrphanStocks[company.Name] += count
+	g.OrphanStocks[company.Name] += count
 	player.Stocks[company.Name] -= count
 	if player.Stocks[company.Name] == 0 {
 		delete(player.Stocks, company.Name)

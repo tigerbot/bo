@@ -21,8 +21,6 @@ var companyInitCond = map[string]struct {
 func NewGame(playerNames []string) *Game {
 	result := new(Game)
 
-	result.GlobalState.Round = 1
-	result.GlobalState.Phase = 1
 	result.GlobalState.TechLevel = 1
 	result.GlobalState.UnminedCoal = []string{"G18", "H17", "I16", "J15", "K14"}
 
@@ -41,7 +39,7 @@ func NewGame(playerNames []string) *Game {
 	var startingCash int
 	switch len(playerNames) {
 	case 3, 4, 5, 6:
-		startingCash = 400
+		startingCash = 250
 	default:
 		startingCash = 10
 	}
@@ -55,5 +53,6 @@ func NewGame(playerNames []string) *Game {
 		result.Players[name].NetWorth = startingCash
 	}
 
+	result.beginMarketPhase()
 	return result
 }
