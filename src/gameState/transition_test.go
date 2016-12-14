@@ -7,6 +7,68 @@ import (
 	"testing"
 )
 
+// TestGameStart checks various parameters of a newly created game. Probably not actually very
+// useful given the current NewGame's complexity (most of it is just assignments that would
+// pretty much need to be copied to be tested which just duplicates code).
+func TestGameStart(t *testing.T) {
+	playerCnt := 3 + rand.Intn(4)
+	playerNames := make([]string, playerCnt)
+	for ind := range playerNames {
+		playerNames[ind] = fmt.Sprintf("%d", ind)
+	}
+	game := NewGame(playerNames)
+
+	if game.Round != 1 {
+		t.Errorf("new game didn't start on round 1: %v", game.Round)
+	}
+	if !game.marketPhase() {
+		t.Errorf("new game didn't start on phase 0: %v", game.Phase)
+	}
+
+	if len(game.Players) != playerCnt {
+		t.Errorf("new game has %d players, expected %d", len(game.Players), playerCnt)
+	} else {
+		for _, name := range playerNames {
+			if game.Players[name] == nil {
+				t.Errorf("new game missing player %q", name)
+			}
+		}
+	}
+	commonCash := game.Players[playerNames[0]].Cash
+	for name, player := range game.Players {
+		if name != player.Name {
+			t.Errorf("player names %q and %q mismatch", name, player.Name)
+		}
+		if len(player.Stocks) != 0 {
+			t.Errorf("player %q started the game with stock: %v", name, player.Stocks)
+		}
+		if player.Cash != commonCash {
+			t.Errorf("player %q started with %d$, others have %d$", name, player.Cash, commonCash)
+		}
+		if player.Cash != player.NetWorth {
+			t.Errorf("player %q has value mismatch: %v$ != %v$", name, player.Cash, player.NetWorth)
+		}
+	}
+
+	if len(game.Companies) != 10 {
+		t.Errorf("new game has %d companies, expected 10", len(game.Companies))
+	}
+	for name, company := range game.Companies {
+		if name != company.Name {
+			t.Errorf("company names %q and %q mismatch", name, company.Name)
+		}
+		if len(company.BuiltTrack) != 0 {
+			t.Errorf("company %q started the game with tracks: %v", name, company.BuiltTrack)
+		}
+		if company.StockPrice != 0 {
+			t.Errorf("company %q started with non-zero price %d$", name, company.StockPrice)
+		}
+		if company.HeldStock != 10 {
+			t.Errorf("company %q started with %d shares, expected 10", name, company.HeldStock)
+		}
+	}
+}
+
 // TestMarkerTurnOrder checks to make sure the players with the least capital get to go first. It
 // also make sure that the order of players that are equivalent (like at the beginning of the game)
 // are sorted in random order.
