@@ -95,7 +95,7 @@ func (s playerSorter) Len() int {
 	return len(s.list)
 }
 func (s playerSorter) Swap(i, j int) {
-	s.list[i], s.list[j] = s.list[i], s.list[j]
+	s.list[i], s.list[j] = s.list[j], s.list[i]
 }
 func (s playerSorter) Less(i, j int) bool {
 	item1, item2 := s.info[s.list[i]], s.info[s.list[j]]
@@ -111,7 +111,7 @@ func (s companySorter) Len() int {
 	return len(s.list)
 }
 func (s companySorter) Swap(i, j int) {
-	s.list[i], s.list[j] = s.list[i], s.list[j]
+	s.list[i], s.list[j] = s.list[j], s.list[i]
 }
 func (s companySorter) Less(i, j int) bool {
 	item1, item2 := s.info[s.list[i]], s.info[s.list[j]]
