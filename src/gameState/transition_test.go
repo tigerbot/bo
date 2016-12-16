@@ -22,7 +22,7 @@ func TestGameStart(t *testing.T) {
 		t.Errorf("new game didn't start on round 1: %v", game.Round)
 	}
 	if !game.marketPhase() {
-		t.Errorf("new game didn't start on phase 0: %v", game.Phase)
+		t.Errorf("new game didn't start in the market phase: %v", game.Phase)
 	}
 
 	if len(game.Players) != playerCnt {
@@ -92,7 +92,7 @@ func TestMarketTurnOrder(t *testing.T) {
 		}
 	}
 	if reflect.DeepEqual(game.turnOrder, prevOrder) {
-		t.Errorf("player order %v produced repeatedly for even players", prevOrder)
+		t.Errorf("player order %v produced repeatedly for starting players", prevOrder)
 	}
 
 	game.Players = map[string]*Player{
@@ -139,6 +139,127 @@ func TestBusinessTurnOrder(t *testing.T) {
 	game.beginBusinessPhase()
 	expected = []string{"1st", "2nd", "3rd", "4th", "5th", "6th", "9th"}
 	if !reflect.DeepEqual(game.turnOrder, expected) {
-		t.Errorf("company order %v doesn't match %v after presidents removed", game.turnOrder, expected)
+		t.Errorf("company order %v doesn't match %v after presidents removed",
+			game.turnOrder, expected)
 	}
+}
+
+// TestMarketPhaseEnd checks to make sure the market phase ends when all players have passed back
+// to back. It also checks to make sure any companies with orphaned stocks have the stock price
+// decrease at the end of the market phase.
+func TestMarketPhaseEnd(t *testing.T) {
+	playerCnt := 3 + rand.Intn(4)
+	playerNames := make([]string, playerCnt)
+	for ind := range playerNames {
+		playerNames[ind] = fmt.Sprintf("%d", ind)
+	}
+	game := NewGame(playerNames)
+
+	if !game.marketPhase() {
+		t.Fatalf("new game didn't start in the market phase: %v", game.Phase)
+	}
+	if game.passes != 0 {
+		t.Fatalf("new game started off with market turn passes: %v", game.passes)
+	}
+	if game.turn != 0 {
+		t.Fatalf("new game started off with market turn passes: %v", game.passes)
+	}
+
+	// Create an orphan company to make sure its stock price is reduced only at the end.
+	const origPrice = 200
+	var orphanCompany *Company
+	for _, company := range game.Companies {
+		orphanCompany = company
+		break
+	}
+	orphanCompany.StockPrice = origPrice
+	game.OrphanStocks[orphanCompany.Name] = 2
+
+	turn := game.turn
+	endTurn := func(pass bool) {
+		game.endMarketTurn(pass)
+		turn += 1
+		if !game.marketPhase() {
+			t.Fatalf("market phase ended prematurely after turn %d with %d players",
+				turn, playerCnt)
+		}
+		if game.turn != turn {
+			t.Errorf("game turn counter %d and test turn counter %d disagree",
+				game.turn, turn)
+			turn = game.turn
+		}
+		if orphanCompany.StockPrice != origPrice {
+			t.Errorf("orphan company stock changed prematurely: %d -> %d",
+				origPrice, orphanCompany.StockPrice)
+		}
+	}
+	for loopInd := 0; loopInd < 10; loopInd += 1 {
+		for passes := rand.Intn(playerCnt); passes > 0; passes -= 1 {
+			endTurn(true)
+		}
+		for actions := rand.Intn(playerCnt) + 1; actions > 0; actions -= 1 {
+			endTurn(false)
+		}
+	}
+
+	// Now actually fulfill the market phase end requirements.
+	for passes := 0; passes < playerCnt-1; passes += 1 {
+		endTurn(true)
+	}
+	game.endMarketTurn(true)
+	if game.marketPhase() {
+		t.Fatal("market phase did not end after every player passed")
+	}
+	if orphanCompany.StockPrice >= origPrice {
+		t.Errorf("orphan stock price %d did not drop from %d", orphanCompany.StockPrice, origPrice)
+	}
+}
+
+// TestBusinessPhaseEnd checks to make sure each business phase ends, when all companies with a
+// president have taken their turn. It also checks to make sure the first business phase ending
+// means the beginning of the second business phase, and that the second business phase ending
+// means the beginning of the market phase of the next round.
+func TestBusinessPhaseEnd(t *testing.T) {
+	// Start off with a game in the market phase so we can call beginBusinessPhase.
+	game := &Game{
+		GlobalState: GlobalState{Round: 1, Phase: 0},
+		Companies: map[string]*Company{
+			"1st": {Name: "1st", President: "president", StockPrice: 350},
+			"2nd": {Name: "2nd", President: "president", StockPrice: 300},
+			"3rd": {Name: "3rd", President: "president", StockPrice: 250},
+			"4th": {Name: "4th", President: "", StockPrice: 200},
+			"5th": {Name: "5th", President: "president", StockPrice: 0},
+			"6th": {Name: "6th", President: "", StockPrice: 0},
+		},
+	}
+	if !game.marketPhase() {
+		t.Fatal("expected game to start in market phase, but it didn't")
+	}
+
+	game.beginBusinessPhase()
+	if !game.businessPhase() {
+		t.Fatalf("did not enter business phase after calling beginBusinessPhase: %v", game.Phase)
+	} else if len(game.turnOrder) != 4 {
+		t.Fatalf("expected 4 items in the turn order: %v", game.turnOrder)
+	}
+
+	checkTurnEndState := func(callNum, round, phase int, business bool) {
+		game.endBusinessTurn()
+		if business != game.businessPhase() {
+			t.Errorf("expected businessPhase to be %v after %d calls", business, callNum)
+		} else if phase != game.Phase {
+			t.Errorf("expected phase %d after %d calls, found %d", phase, callNum, game.Phase)
+		} else if round != game.Round {
+			t.Errorf("expected round %d after %d calls, found %d", round, callNum, game.Round)
+		}
+	}
+
+	checkTurnEndState(1, 1, 1, true)
+	checkTurnEndState(2, 1, 1, true)
+	checkTurnEndState(3, 1, 1, true)
+	checkTurnEndState(4, 1, 2, true)
+	checkTurnEndState(5, 1, 2, true)
+	checkTurnEndState(6, 1, 2, true)
+	checkTurnEndState(7, 1, 2, true)
+	checkTurnEndState(8, 2, 0, false)
 }

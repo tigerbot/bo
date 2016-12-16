@@ -23,6 +23,7 @@ func NewGame(playerNames []string) *Game {
 
 	result.GlobalState.TechLevel = 1
 	result.GlobalState.UnminedCoal = []string{"G18", "H17", "I16", "J15", "K14"}
+	result.GlobalState.OrphanStocks = make(map[string]int)
 
 	result.Companies = make(map[string]*Company, len(companyInitCond))
 	for name, start := range companyInitCond {

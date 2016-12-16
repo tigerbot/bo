@@ -33,7 +33,7 @@ type Company struct {
 	Equipment    [6]int   `json:"equipment"`
 }
 
-// The Player struct keeps track of a single players liquid assests and stock.
+// The Player struct keeps track of a single players liquid assets and stock.
 type Player struct {
 	Name     string         `json:"-"`
 	Cash     int            `json:"cash"`
