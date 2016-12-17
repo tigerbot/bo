@@ -5,6 +5,21 @@ import (
 	"testing"
 )
 
+func randomCompany(techLvl3 ...bool) string {
+	// We have no control over the order we iterate over a map, but it's not necessarily random.
+	// So in order to do true random we create a list of company names that match the requirement
+	// and then return a random value from that list
+	nameList := make([]string, 0, len(companyInitCond))
+	for name, start := range companyInitCond {
+		if len(techLvl3) == 0 {
+			nameList = append(nameList, name)
+		} else if techLvl3[0] == start.tech3 {
+			nameList = append(nameList, name)
+		}
+	}
+	return nameList[rand.Intn(len(nameList))]
+}
+
 // TestMarketActionNonMarketPhase checks to make sure market actions can only be performed during
 // the market phase.
 func TestMarketActionPhaseValidation(t *testing.T) {
@@ -56,10 +71,7 @@ func TestMarketPlayerValidation(t *testing.T) {
 // information and the ones whose information conflicts with the internal game state error.
 func TestMarketActionValidation(t *testing.T) {
 	game := NewGame([]string{"1st", "2nd", "3rd", "4th"})
-	var companyName string
-	for name, _ := range game.Companies {
-		companyName = name
-	}
+	companyName := randomCompany()
 	game.Companies[companyName].StockPrice = 100
 	playerName := game.turnOrder[0]
 
@@ -116,13 +128,8 @@ var startingPrices = [][3]int{
 // TestStartingTech3Company makes sure the companies labeled at only available after tech level 3
 // cannot be started before that.
 func TestStartingTech3Company(t *testing.T) {
-	var companyName string
-	for name, start := range companyInitCond {
-		if start.tech3 {
-			companyName = name
-			break
-		}
-	}
+	companyName := randomCompany(true)
+
 	for ind, prices := range startingPrices[:2] {
 		techLvl := ind + 1
 		price := prices[rand.Intn(3)]
@@ -133,6 +140,7 @@ func TestStartingTech3Company(t *testing.T) {
 				companyName, techLvl, endPrice)
 		}
 	}
+
 	for ind, prices := range startingPrices[2:] {
 		techLvl := ind + 3
 		price := prices[rand.Intn(3)]
@@ -148,16 +156,11 @@ func TestStartingTech3Company(t *testing.T) {
 // TestStartingCompanyPrices checks to make sure a company can be started at any price valid for
 // the current tech level, and none other.
 func TestStartingCompanyPrices(t *testing.T) {
-	var companyName string
-	for name, start := range companyInitCond {
-		if !start.tech3 {
-			companyName = name
-			break
-		}
-	}
+	companyName := randomCompany(false)
 
 	for ind, prices := range startingPrices {
 		techLvl := ind + 1
+
 		for _, price := range prices {
 			if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err != nil {
 				t.Errorf("starting %s in tech level %d at %d$ failed: %v",
@@ -189,15 +192,10 @@ func TestStartingCompanyPrices(t *testing.T) {
 // TestStartingCompanyFailure checks to make sure a company's stock price doesn't change if the
 // player doesn't have enough cash to complete the transaction.
 func TestStartingCompanyFailure(t *testing.T) {
-	var companyName string
-	for name, start := range companyInitCond {
-		if !start.tech3 {
-			companyName = name
-			break
-		}
-	}
+	companyName := randomCompany(false)
 	price := startingPrices[0][1]
 	count := rand.Intn(9) + 1
+
 	if err, endPrice := startCompany(companyName, count, price, count*price-20, 1); err == nil {
 		t.Errorf("attempt to buy %d %s shares at %d$ with insufficient cash did not error",
 			count, companyName, price)
