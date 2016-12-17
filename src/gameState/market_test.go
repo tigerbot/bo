@@ -103,16 +103,55 @@ func TestMarketActionValidation(t *testing.T) {
 // startCompany is a convenience function for the tests that check starting companies under various
 // conditions. It creates a new game for every call, initializes some of the specified parameters,
 // then performs the market action with the remaining parameters.
-func startCompany(companyName string, count, price, cash, techLvl int) (error, int) {
-	game := NewGame([]string{"player"})
+func startCompany(t *testing.T, companyName string, count, price, cash, techLvl int) error {
+	game := NewGame([]string{"1st", "2nd", "3rd"})
 	game.TechLevel = techLvl
-	game.Players["player"].Cash = cash
-	err := game.PerformMarketAction("player", MarketAction{
+	playerName := game.turnOrder[0]
+	game.Players[playerName].Cash = cash
+	err := game.PerformMarketAction(playerName, MarketAction{
 		Company: companyName,
 		Count:   count,
 		Price:   price,
 	})
-	return err, game.Companies[companyName].StockPrice
+
+	// Test the things that should be the same no matter what the initial conditions are.
+	if err == nil {
+		if endPrice := game.Companies[companyName].StockPrice; endPrice != price {
+			t.Errorf("after starting %s at $%d, stock price is $%d", companyName, price, endPrice)
+		}
+		if stockLeft := game.Companies[companyName].HeldStock; stockLeft != 10-count {
+			t.Errorf("%d stock left after starting purchase of %d", stockLeft, count)
+		}
+		if president := game.Companies[companyName].President; president != playerName {
+			t.Errorf("%s started company, but company president is %q", playerName, president)
+		}
+		if playerCash := game.Players[playerName].Cash; playerCash != cash-count*price {
+			t.Errorf("player started with $%d, bought %d shares at $%d, left with $%d",
+				cash, count, price, playerCash)
+		}
+		if playerStock := game.Players[playerName].Stocks[companyName]; playerStock != count {
+			t.Errorf("player has %d shares of %d after buying %d", playerStock, count)
+		}
+	} else {
+		if endPrice := game.Companies[companyName].StockPrice; endPrice != 0 {
+			t.Errorf("failed start of %s at $%d, left price at $%d", companyName, price, endPrice)
+		}
+		if stockLeft := game.Companies[companyName].HeldStock; stockLeft != 10 {
+			t.Errorf("%d stock left after failed starting purchase of %d", stockLeft, count)
+		}
+		if president := game.Companies[companyName].President; president != "" {
+			t.Errorf("%s failed starting company, left president as %q", playerName, president)
+		}
+		if playerCash := game.Players[playerName].Cash; playerCash != cash {
+			t.Errorf("player started with $%d, failed buying %d shares at $%d, left with $%d",
+				cash, count, price, playerCash)
+		}
+		if playerStock := game.Players[playerName].Stocks[companyName]; playerStock != 0 {
+			t.Errorf("player has %d shares after failing to buy %d", playerStock, count)
+		}
+	}
+
+	return err
 }
 
 // startingPrices is the list of valid stock prices for each tech level (as printed on the physical
@@ -133,22 +172,16 @@ func TestCompanyStartTech3(t *testing.T) {
 	for ind, prices := range startingPrices[:2] {
 		techLvl := ind + 1
 		price := prices[rand.Intn(3)]
-		if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err == nil {
+		if err := startCompany(t, companyName, 4, price, 500, techLvl); err == nil {
 			t.Errorf("starting %s during tech level %d did not error", companyName, techLvl)
-		} else if endPrice != 0 {
-			t.Errorf("failed starting %s in tech level %d left price as $%d",
-				companyName, techLvl, endPrice)
 		}
 	}
 
 	for ind, prices := range startingPrices[2:] {
 		techLvl := ind + 3
 		price := prices[rand.Intn(3)]
-		if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err != nil {
+		if err := startCompany(t, companyName, 4, price, 500, techLvl); err != nil {
 			t.Errorf("starting %s during tech level %d failed: %v", companyName, techLvl, err)
-		} else if endPrice != price {
-			t.Errorf("starting %s in tech level %d at $%d left price as $%d",
-				companyName, techLvl, price, endPrice)
 		}
 	}
 }
@@ -162,12 +195,9 @@ func TestCompanyStartPrices(t *testing.T) {
 		techLvl := ind + 1
 
 		for _, price := range prices {
-			if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err != nil {
+			if err := startCompany(t, companyName, 4, price, 500, techLvl); err != nil {
 				t.Errorf("starting %s in tech level %d at $%d failed: %v",
 					companyName, techLvl, price, err)
-			} else if endPrice != price {
-				t.Errorf("starting %s in tech level %d at $%d left price as $%d",
-					companyName, techLvl, price, endPrice)
 			}
 		}
 
@@ -178,12 +208,9 @@ func TestCompanyStartPrices(t *testing.T) {
 			prices[2] + rand.Intn(20) + 1,
 		}
 		for _, price := range invalidPrices {
-			if err, endPrice := startCompany(companyName, 1, price, price*2, techLvl); err == nil {
+			if err := startCompany(t, companyName, 1, price, price*2, techLvl); err == nil {
 				t.Errorf("starting %s in tech level %d at $%d (invalid) did not error",
 					companyName, techLvl, price)
-			} else if endPrice != 0 {
-				t.Errorf("failed starting %s in tech level %d at $%d (invalid) left price as $%d",
-					companyName, techLvl, price, endPrice)
 			}
 		}
 	}
@@ -194,14 +221,17 @@ func TestCompanyStartPrices(t *testing.T) {
 func TestCompanyStartFailure(t *testing.T) {
 	companyName := randomCompany(false)
 	price := startingPrices[0][1]
-	count := rand.Intn(9) + 1
 
-	if err, endPrice := startCompany(companyName, count, price, count*price-20, 1); err == nil {
+	count := rand.Intn(9) + 1
+	if err := startCompany(t, companyName, count, price, count*price-20, 1); err == nil {
 		t.Errorf("attempt to buy %d %s shares at $%d with insufficient cash did not error",
 			count, companyName, price)
-	} else if endPrice != 0 {
-		t.Errorf("attempt to buy %d %s shares at $%d with insufficient cash left price at $%d",
-			count, companyName, price, endPrice)
+	}
+
+	count = 11
+	if err := startCompany(t, companyName, count, price, count*price, 1); err == nil {
+		t.Errorf("attempt to buy %d %s shares at $%d with insufficient cash did not error",
+			count, companyName, price)
 	}
 }
 
