@@ -16,7 +16,7 @@ func (g *Game) PerformMarketAction(playerName string, action MarketAction) (err 
 	defer func() {
 		// If there was no error when we returned that means this action succeeded and its the
 		// next player's turn.
-		if err != nil {
+		if err == nil {
 			g.endMarketTurn(action.Count == 0)
 		}
 	}()

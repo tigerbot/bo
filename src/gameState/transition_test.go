@@ -73,17 +73,7 @@ func TestGameStart(t *testing.T) {
 // also make sure that the order of players that are equivalent (like at the beginning of the game)
 // are sorted in random order.
 func TestMarketTurnOrder(t *testing.T) {
-	game := new(Game)
-
-	game.Players = map[string]*Player{
-		"1st": &Player{Cash: 250, NetWorth: 250, Name: "1st"},
-		"2nd": &Player{Cash: 250, NetWorth: 250, Name: "2nd"},
-		"3rd": &Player{Cash: 250, NetWorth: 250, Name: "3rd"},
-		"4th": &Player{Cash: 250, NetWorth: 250, Name: "4th"},
-		"5th": &Player{Cash: 250, NetWorth: 250, Name: "5th"},
-		"6th": &Player{Cash: 250, NetWorth: 250, Name: "6th"},
-	}
-	game.beginMarketPhase()
+	game := NewGame([]string{"1st", "2nd", "3rd", "4th", "5th", "6th"})
 	prevOrder := game.turnOrder
 	for inc := 0; inc < 2; inc += 1 {
 		game.beginMarketPhase()
