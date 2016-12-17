@@ -108,7 +108,7 @@ func (g *Game) buyStock(player *Player, company *Company, count int) error {
 			g.OrphanStocks[company.Name] -= count
 			count = 0
 		}
-		price = count * price
+		price = count * company.StockPrice
 	}
 	company.Treasury += price
 	company.HeldStock -= count
