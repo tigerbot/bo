@@ -87,3 +87,122 @@ func TestMarketActionValidation(t *testing.T) {
 		t.Errorf("%s failed to buy 1 share in %s: %v", playerName, companyName, err)
 	}
 }
+
+// startCompany is a convenience function for the tests that check starting companies under various
+// conditions. It creates a new game for every call, initializes some of the specified parameters,
+// then performs the market action with the remaining parameters.
+func startCompany(companyName string, count, price, cash, techLvl int) (error, int) {
+	game := NewGame([]string{"player"})
+	game.TechLevel = techLvl
+	game.Players["player"].Cash = cash
+	err := game.PerformMarketAction("player", MarketAction{
+		Company: companyName,
+		Count:   count,
+		Price:   price,
+	})
+	return err, game.Companies[companyName].StockPrice
+}
+
+// startingPrices is the list of valid stock prices for each tech level (as printed on the physical
+// board of the original game).
+var startingPrices = [][3]int{
+	[3]int{55, 60, 66},
+	[3]int{60, 66, 74},
+	[3]int{66, 74, 82},
+	[3]int{74, 82, 91},
+	[3]int{82, 91, 100},
+}
+
+// TestStartingTech3Company makes sure the companies labeled at only available after tech level 3
+// cannot be started before that.
+func TestStartingTech3Company(t *testing.T) {
+	var companyName string
+	for name, start := range companyInitCond {
+		if start.tech3 {
+			companyName = name
+			break
+		}
+	}
+	for ind, prices := range startingPrices[:2] {
+		techLvl := ind + 1
+		price := prices[rand.Intn(3)]
+		if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err == nil {
+			t.Errorf("starting %s during tech level %d did not error", companyName, techLvl)
+		} else if endPrice != 0 {
+			t.Errorf("failed starting %s in tech level %d left price as %d$",
+				companyName, techLvl, endPrice)
+		}
+	}
+	for ind, prices := range startingPrices[2:] {
+		techLvl := ind + 3
+		price := prices[rand.Intn(3)]
+		if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err != nil {
+			t.Errorf("starting %s during tech level %d failed: %v", companyName, techLvl, err)
+		} else if endPrice != price {
+			t.Errorf("starting %s in tech level %d at %d$ left price as %d$",
+				companyName, techLvl, price, endPrice)
+		}
+	}
+}
+
+// TestStartingCompanyPrices checks to make sure a company can be started at any price valid for
+// the current tech level, and none other.
+func TestStartingCompanyPrices(t *testing.T) {
+	var companyName string
+	for name, start := range companyInitCond {
+		if !start.tech3 {
+			companyName = name
+			break
+		}
+	}
+
+	for ind, prices := range startingPrices {
+		techLvl := ind + 1
+		for _, price := range prices {
+			if err, endPrice := startCompany(companyName, 4, price, 500, techLvl); err != nil {
+				t.Errorf("starting %s in tech level %d at %d$ failed: %v",
+					companyName, techLvl, price, err)
+			} else if endPrice != price {
+				t.Errorf("starting %s in tech level %d at %d$ left price as %d$",
+					companyName, techLvl, price, endPrice)
+			}
+		}
+
+		invalidPrices := []int{
+			prices[0] - (rand.Intn(20) + 1),
+			prices[0] + rand.Intn(prices[1]-prices[0]-1) + 1,
+			prices[1] + rand.Intn(prices[2]-prices[1]-1) + 1,
+			prices[2] + rand.Intn(20) + 1,
+		}
+		for _, price := range invalidPrices {
+			if err, endPrice := startCompany(companyName, 1, price, price*2, techLvl); err == nil {
+				t.Errorf("starting %s in tech level %d at %d$ (invalid) did not error",
+					companyName, techLvl, price)
+			} else if endPrice != 0 {
+				t.Errorf("failed starting %s in tech level %d at %d$ (invalid) left price as %d$",
+					companyName, techLvl, price, endPrice)
+			}
+		}
+	}
+}
+
+// TestStartingCompanyFailure checks to make sure a company's stock price doesn't change if the
+// player doesn't have enough cash to complete the transaction.
+func TestStartingCompanyFailure(t *testing.T) {
+	var companyName string
+	for name, start := range companyInitCond {
+		if !start.tech3 {
+			companyName = name
+			break
+		}
+	}
+	price := startingPrices[0][1]
+	count := rand.Intn(9) + 1
+	if err, endPrice := startCompany(companyName, count, price, count*price-20, 1); err == nil {
+		t.Errorf("attempt to buy %d %s shares at %d$ with insufficient cash did not error",
+			count, companyName, price)
+	} else if endPrice != 0 {
+		t.Errorf("attempt to buy %d %s shares at %d$ with insufficient cash left price at %d$",
+			count, companyName, price, endPrice)
+	}
+}
