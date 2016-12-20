@@ -125,6 +125,12 @@ func (g *Game) sellStock(player *Player, company *Company, count int) error {
 		return fmt.Errorf("%s has no stock in %s", player.Name, company.Name)
 	} else if count > held {
 		return fmt.Errorf("%s only has %d shares in %s", player.Name, held, company.Name)
+	} else if count == held {
+		// If the sum of this player's shares, the company's shares, and the orphaned shares
+		// equal the total number of shares then no other player has any stock in this company
+		if company.HeldStock+g.OrphanStocks[company.Name]+count == 10 {
+			return fmt.Errorf("Cannot sell the last player held stock in %s", company.Name)
+		}
 	}
 	player.Cash += count * company.StockPrice
 
@@ -141,9 +147,6 @@ func (g *Game) sellStock(player *Player, company *Company, count int) error {
 				company.President = otherName
 				president = otherPlayer
 			}
-		}
-		if president.Stocks[company.Name] == 0 {
-			company.President = ""
 		}
 	}
 	return nil

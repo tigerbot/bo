@@ -51,8 +51,8 @@ func sellStock(t *testing.T, game *Game, playerName, companyName string, count i
 	return err
 }
 
-// TestStockSell checks to make sure players cannot sell more stock than they have, and that the
-// money and stock changes the way it should.
+// TestStockSell checks to make sure players cannot sell more stock than they have or the last
+// player held stock.
 func TestStockSell(t *testing.T) {
 	playerName := "player"
 	game := NewGame([]string{playerName})
@@ -74,16 +74,20 @@ func TestStockSell(t *testing.T) {
 	if err := sellStock(t, game, playerName, action.Company, action.Count+1); err == nil {
 		t.Fatal("player selling more stock than they hold did not fail")
 	}
+	if err := sellStock(t, game, playerName, action.Company, action.Count); err == nil {
+		t.Fatal("player selling all their stock when none held by other players did not fail")
+	}
+	if err := sellStock(t, game, playerName, action.Company, action.Count-1); err != nil {
+		t.Fatalf("player failed selling all but their last stock: %v", err)
+	}
 
-	if err := sellStock(t, game, playerName, action.Company, action.Count); err != nil {
-		t.Fatalf("player selling all their stock failed: %v", err)
-	} else {
-		if _, present := game.Players[playerName].Stocks[action.Company]; present {
-			t.Error("selling all player stock did not remove item from stock map")
-		}
-		if president := game.Companies[action.Company].President; president != "" {
-			t.Errorf("selling all player %s's stock left president as %q", playerName, president)
-		}
+	// Fabricate a player to have a share in the company so we can sell the last one.
+	game.Players["fake"] = &Player{Name: "fake", Stocks: map[string]int{action.Company: 1}}
+	game.OrphanStocks[action.Company] -= 1
+	if err := sellStock(t, game, playerName, action.Company, 1); err != nil {
+		t.Fatalf("player failed selling their last stock after other play acquire some: %v", err)
+	} else if _, present := game.Players[playerName].Stocks[action.Company]; present {
+		t.Error("selling last of player's shares didn't remove entry from map")
 	}
 }
 
