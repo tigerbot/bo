@@ -34,7 +34,7 @@ func TestGameStart(t *testing.T) {
 			}
 		}
 	}
-	commonCash := game.Players[playerNames[0]].Cash
+	commonCash := 1500 / playerCnt
 	for name, player := range game.Players {
 		if name != player.Name {
 			t.Errorf("player names %q and %q mismatch", name, player.Name)

@@ -23,7 +23,7 @@ func NewGame(playerNames []string) *Game {
 
 	result.GlobalState.TechLevel = 1
 	result.GlobalState.UnminedCoal = []string{"G18", "H17", "I16", "J15", "K14"}
-	result.GlobalState.OrphanStocks = make(map[string]int)
+	result.GlobalState.OrphanStocks = make(map[string]int, len(companyInitCond))
 
 	result.Companies = make(map[string]*Company, len(companyInitCond))
 	for name, start := range companyInitCond {
@@ -36,21 +36,13 @@ func NewGame(playerNames []string) *Game {
 		result.Companies[name].BuiltTrack = []string{}
 	}
 
-	// TODO: actually figure out how much cash each player is supposed to start with
-	var startingCash int
-	switch len(playerNames) {
-	case 3, 4, 5, 6:
-		startingCash = 250
-	default:
-		startingCash = 10
-	}
-
+	startingCash := 1500 / len(playerNames)
 	result.Players = make(map[string]*Player, len(playerNames))
 	for _, name := range playerNames {
 		result.Players[name] = new(Player)
 		result.Players[name].Name = name
 		result.Players[name].Cash = startingCash
-		result.Players[name].Stocks = map[string]int{}
+		result.Players[name].Stocks = make(map[string]int, len(companyInitCond))
 		result.Players[name].NetWorth = startingCash
 	}
 
