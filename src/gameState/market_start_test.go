@@ -2,6 +2,7 @@ package gameState
 
 import (
 	"math/rand"
+	"reflect"
 	"testing"
 )
 
@@ -126,5 +127,44 @@ func TestCompanyStartTech3(t *testing.T) {
 		if errs := startCompanyNewGame(t, company, 4, price, 500, techLvl); len(errs) > 0 {
 			t.Errorf("starting %s during tech level %d failed: %v", company, techLvl, errs)
 		}
+	}
+}
+
+// TestStartedTurnOrder makes sure that company turn order in the first business round is the
+// same as the order they were purchased in if they at start out with the same price. The partly
+// duplicates TestBusinessTurnOrder, but the main purpose of this test is really to make sure the
+// parameters needed to properly sort the list are set when companies are started.
+func TestStartedTurnOrder(t *testing.T) {
+	game := NewGame([]string{"1st", "2nd", "3rd", "4th"})
+
+	companyList := make([]string, 0, len(companyInitCond))
+	for name, start := range companyInitCond {
+		if !start.tech3 {
+			companyList = append(companyList, name)
+		}
+	}
+	for ind := range companyList {
+		swap := rand.Intn(ind + 1)
+		companyList[ind], companyList[swap] = companyList[swap], companyList[ind]
+	}
+	companyList = companyList[:4]
+
+	// Now that we've determined which companies to start and in which order we need to actually
+	// start them, then pass to end the market phase.
+	for ind, companyName := range companyList {
+		if errs := startCompany(t, game, companyName, 5, startingPrices[0][1]); len(errs) > 0 {
+			t.Fatalf("failed to start company #%d (%s): %v", ind, companyName, errs)
+		}
+	}
+	for _ = range companyList {
+		if errs := game.PerformMarketTurn(game.currentTurn(), MarketTurn{}); len(errs) > 0 {
+			t.Fatalf("failed to pass market turn to advance phase: %v", errs)
+		}
+	}
+	if !game.businessPhase() {
+		t.Fatal("failed to enter business phase")
+	}
+	if !reflect.DeepEqual(companyList, game.TurnOrder) {
+		t.Errorf("company turn order %v != starting order %v", game.TurnOrder, companyList)
 	}
 }

@@ -130,6 +130,7 @@ func (g *Game) buyStock(player *Player, buyInfo MarketAction) error {
 
 	if company.StockPrice == 0 {
 		company.StockPrice = buyInfo.Price
+		company.PriceChange = g.timeString()
 		company.BuiltTrack = []string{boardInfo.StartingLocation(company.Name)}
 	}
 

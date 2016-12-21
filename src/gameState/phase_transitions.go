@@ -9,8 +9,7 @@ import (
 )
 
 func (g *GlobalState) timeString() string {
-	result := fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.Turn)
-	return result
+	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.Turn)
 }
 
 func (g *GlobalState) marketPhase() bool {
