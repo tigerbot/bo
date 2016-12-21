@@ -202,3 +202,48 @@ func TestStockBuyTakeover(t *testing.T) {
 		t.Fatalf("president changed to %q after other player exceeded pres", president)
 	}
 }
+
+// TestStockBuyWithSaleProfit checks to make sure that stocks can be bought with the money earned
+// from sales made in the same turn as the purchase.
+func TestStockBuyWithSaleProfit(t *testing.T) {
+	playerName := "player"
+	game := NewGame([]string{playerName})
+	game.Players[playerName].Cash = 400
+
+	// Chose the companies whose stocks the player will buy and sell.
+	company1 := randomCompany(false)
+	company2 := randomCompany(false)
+	company3 := randomCompany(false)
+	for company2 == company1 {
+		company2 = randomCompany(false)
+	}
+	for company3 == company1 || company3 == company2 {
+		company3 = randomCompany(false)
+	}
+
+	// First we need to buy stock in company 1 so we can sell it to buy from company 2
+	if errs := startCompany(t, game, company1, 6, 60); len(errs) > 0 {
+		t.Fatalf("failed to make the first purchase: %v", errs)
+	}
+
+	turn := MarketTurn{
+		Sales: []MarketAction{
+			MarketAction{Company: company1, Count: 3, Price: 60},
+		},
+		Purchase: &MarketAction{Company: company2, Count: 3, Price: 60},
+	}
+	if errs := testMarketTurn(t, game, playerName, turn); len(errs) > 0 {
+		t.Fatalf("failed to sell company 1 stock to buy company 2 stock: %v", errs)
+	}
+
+	turn = MarketTurn{
+		Sales: []MarketAction{
+			MarketAction{Company: company1, Count: 1, Price: 60},
+			MarketAction{Company: company2, Count: 1, Price: 60},
+		},
+		Purchase: &MarketAction{Company: company3, Count: 2, Price: 60},
+	}
+	if errs := testMarketTurn(t, game, playerName, turn); len(errs) > 0 {
+		t.Fatalf("failed to sell company 1 and company 2 stock to buy company 3 stock: %v", errs)
+	}
+}
