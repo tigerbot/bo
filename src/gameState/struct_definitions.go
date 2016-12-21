@@ -5,9 +5,9 @@ type GlobalState struct {
 	Round int `json:"round"`
 	Phase int `json:"phase"`
 
-	turnOrder []string `json:"-"`
-	turn      int      `json:"-"`
-	passes    int      `json:"-"`
+	TurnOrder []string `json:"turn_order"`
+	Turn      int      `json:"-"`
+	Passes    int      `json:"-"`
 
 	TrainsBought int            `json:"trains_bought"`
 	TechLevel    int            `json:"tech_level"`
@@ -45,4 +45,14 @@ type Game struct {
 	GlobalState
 	Companies map[string]*Company
 	Players   map[string]*Player
+}
+
+type MarketAction struct {
+	Company string `json:"company,omitempty"`
+	Count   int    `json:"count,omitempty"`
+	Price   int    `json:"price,omitempty"`
+}
+type MarketTurn struct {
+	Sales    []MarketAction `json:"sales,omitempty"`
+	Purchase *MarketAction  `json:"purchase,omitempty"`
 }

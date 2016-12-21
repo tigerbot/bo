@@ -6,16 +6,6 @@ import (
 	"boardInfo"
 )
 
-type MarketAction struct {
-	Company string `json:"company,omitempty"`
-	Count   int    `json:"count,omitempty"`
-	Price   int    `json:"price,omitempty"`
-}
-type MarketTurn struct {
-	Sales    []MarketAction `json:"sales,omitempty"`
-	Purchase *MarketAction  `json:"purchase,omitempty"`
-}
-
 func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []error) {
 	defer func() {
 		// If there was no error when we returned that means this action succeeded and its the

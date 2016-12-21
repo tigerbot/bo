@@ -9,7 +9,7 @@ import (
 )
 
 func (g *GlobalState) timeString() string {
-	result := fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.turn)
+	result := fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.Turn)
 	return result
 }
 
@@ -21,43 +21,43 @@ func (g *GlobalState) businessPhase() bool {
 }
 
 func (g *GlobalState) currentTurn() string {
-	return g.turnOrder[g.turn%len(g.turnOrder)]
+	return g.TurnOrder[g.Turn%len(g.TurnOrder)]
 }
 
 func (g *Game) beginMarketPhase() {
 	g.Round += 1
 	g.Phase = 0
-	g.turn = 0
-	g.passes = 0
+	g.Turn = 0
+	g.Passes = 0
 
-	g.turnOrder = make([]string, 0, len(g.Players))
+	g.TurnOrder = make([]string, 0, len(g.Players))
 	for name, _ := range g.Players {
-		g.turnOrder = append(g.turnOrder, name)
+		g.TurnOrder = append(g.TurnOrder, name)
 	}
-	sort.Sort(playerSorter{list: g.turnOrder, info: g.Players})
+	sort.Sort(playerSorter{list: g.TurnOrder, info: g.Players})
 }
 
 func (g *Game) beginBusinessPhase() {
 	g.Phase += 1
-	g.turn = 0
+	g.Turn = 0
 
-	g.turnOrder = make([]string, 0, len(g.Companies))
+	g.TurnOrder = make([]string, 0, len(g.Companies))
 	for name, company := range g.Companies {
 		if company.President != "" {
-			g.turnOrder = append(g.turnOrder, name)
+			g.TurnOrder = append(g.TurnOrder, name)
 		}
 	}
-	sort.Sort(companySorter{list: g.turnOrder, info: g.Companies})
+	sort.Sort(companySorter{list: g.TurnOrder, info: g.Companies})
 }
 
 func (g *Game) endMarketTurn(pass bool) {
-	g.turn += 1
+	g.Turn += 1
 
 	// If every player has passed (in a row) then we are finished with the market phase and need
 	// to begin the next business phase.
 	if !pass {
-		g.passes = 0
-	} else if g.passes += 1; g.passes == len(g.turnOrder) {
+		g.Passes = 0
+	} else if g.Passes += 1; g.Passes == len(g.TurnOrder) {
 		// Any companies that have orphaned stock by the end of the market phase have their stock
 		// prices reduced.
 		for name, _ := range g.OrphanStocks {
@@ -69,7 +69,7 @@ func (g *Game) endMarketTurn(pass bool) {
 }
 
 func (g *Game) endBusinessTurn() {
-	if g.turn += 1; g.turn == len(g.turnOrder) {
+	if g.Turn += 1; g.Turn == len(g.TurnOrder) {
 		if g.Phase == 1 {
 			g.beginBusinessPhase()
 		} else {

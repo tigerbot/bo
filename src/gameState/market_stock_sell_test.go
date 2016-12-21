@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func sellStock(t *testing.T, game *Game, playerName, companyName string, count int) error {
+func sellStock(t *testing.T, game *Game, playerName, companyName string, count int) []error {
 	startPrice := game.Companies[companyName].StockPrice
 	startHeld := game.Companies[companyName].HeldStock
 	startTreasure := game.Companies[companyName].Treasury
@@ -13,8 +13,17 @@ func sellStock(t *testing.T, game *Game, playerName, companyName string, count i
 
 	startStock := game.Players[playerName].Stocks[companyName]
 	startCash := game.Players[playerName].Cash
+	totalCost := count * startPrice
 
-	err := game.PerformMarketAction(playerName, MarketAction{Company: companyName, Count: -count})
+	turn := MarketTurn{
+		Sales: []MarketAction{
+			MarketAction{Company: companyName, Count: count},
+		},
+	}
+	if errs := testMarketTurn(t, game, playerName, turn); len(errs) > 0 {
+		return errs
+	}
+
 	if stockPrice := game.Companies[companyName].StockPrice; stockPrice != startPrice {
 		t.Errorf("selling stock changed price from $%d to $%d", startPrice, stockPrice)
 	}
@@ -24,31 +33,16 @@ func sellStock(t *testing.T, game *Game, playerName, companyName string, count i
 	if treasure := game.Companies[companyName].Treasury; treasure != startTreasure {
 		t.Errorf("selling stock changed company treasury from $%d to $%d", startTreasure, treasure)
 	}
-	if err == nil {
-		totalCost := count * startPrice
-		if change := startStock - game.Players[playerName].Stocks[companyName]; change != count {
-			t.Errorf("player lost %d stock after selling %d", change, count)
-		}
-		if change := game.Players[playerName].Cash - startCash; change != totalCost {
-			t.Errorf("player made $%d after selling %d stock at $%d", change, count, startPrice)
-		}
-		if change := game.OrphanStocks[companyName] - startOrphan; change != count {
-			t.Errorf("company orphaned stock changed by %d after player sold %d", change, count)
-		}
-	} else {
-		if change := startStock - game.Players[playerName].Stocks[companyName]; change != 0 {
-			t.Errorf("player lost %d stock after failing to sell %d", change, count)
-		}
-		if change := game.Players[playerName].Cash - startCash; change != 0 {
-			t.Errorf("player made $%d after failing to sell %d stock at $%d",
-				change, count, startPrice)
-		}
-		if change := game.OrphanStocks[companyName] - startOrphan; change != 0 {
-			t.Errorf("company orphaned stock changed by %d after player failed to sold %d",
-				change, count)
-		}
+	if change := startStock - game.Players[playerName].Stocks[companyName]; change != count {
+		t.Errorf("player lost %d stock after selling %d", change, count)
 	}
-	return err
+	if change := game.Players[playerName].Cash - startCash; change != totalCost {
+		t.Errorf("player made $%d after selling %d stock at $%d", change, count, startPrice)
+	}
+	if change := game.OrphanStocks[companyName] - startOrphan; change != count {
+		t.Errorf("company orphaned stock changed by %d after player sold %d", change, count)
+	}
+	return nil
 }
 
 // TestStockSell checks to make sure players cannot sell more stock than they have or the last
@@ -63,29 +57,29 @@ func TestStockSell(t *testing.T) {
 	}
 	game.Players[playerName].Cash = action.Price * action.Count
 
-	if err := sellStock(t, game, playerName, action.Company, 1); err == nil {
+	if errs := sellStock(t, game, playerName, action.Company, 1); len(errs) == 0 {
 		t.Fatal("player selling stock they do not have did not fail")
 	}
 
-	if err := game.PerformMarketAction(playerName, action); err != nil {
+	if err := startCompany(t, game, action.Company, action.Count, action.Price); err != nil {
 		t.Fatalf("player failed to acquire stock to sell: %v", err)
 	}
 
-	if err := sellStock(t, game, playerName, action.Company, action.Count+1); err == nil {
+	if errs := sellStock(t, game, playerName, action.Company, action.Count+1); len(errs) == 0 {
 		t.Fatal("player selling more stock than they hold did not fail")
 	}
-	if err := sellStock(t, game, playerName, action.Company, action.Count); err == nil {
+	if errs := sellStock(t, game, playerName, action.Company, action.Count); len(errs) == 0 {
 		t.Fatal("player selling all their stock when none held by other players did not fail")
 	}
-	if err := sellStock(t, game, playerName, action.Company, action.Count-1); err != nil {
-		t.Fatalf("player failed selling all but their last stock: %v", err)
+	if errs := sellStock(t, game, playerName, action.Company, action.Count-1); len(errs) > 0 {
+		t.Fatalf("player failed selling all but their last stock: %v", errs)
 	}
 
 	// Fabricate a player to have a share in the company so we can sell the last one.
 	game.Players["fake"] = &Player{Name: "fake", Stocks: map[string]int{action.Company: 1}}
 	game.OrphanStocks[action.Company] -= 1
-	if err := sellStock(t, game, playerName, action.Company, 1); err != nil {
-		t.Fatalf("player failed selling their last stock after other play acquire some: %v", err)
+	if errs := sellStock(t, game, playerName, action.Company, 1); len(errs) > 0 {
+		t.Fatalf("player failed selling their last stock after other play acquire some: %v", errs)
 	} else if _, present := game.Players[playerName].Stocks[action.Company]; present {
 		t.Error("selling last of player's shares didn't remove entry from map")
 	}
@@ -103,26 +97,26 @@ func TestStockSellStepdown(t *testing.T) {
 	game.Players["pres"].Cash = 6 * action.Price
 	game.Players["other"].Cash = 4 * action.Price
 
-	game.turnOrder = []string{"other"}
-	if err := game.PerformMarketAction("other", action); err != nil {
-		t.Fatalf("initial stock purchase failed: %v", err)
+	game.TurnOrder = []string{"other"}
+	if errs := startCompany(t, game, action.Company, action.Count, action.Price); len(errs) > 0 {
+		t.Fatalf("initial stock purchase failed: %v", errs)
 	}
 
-	game.turnOrder = []string{"pres"}
-	if err := buyStock(t, game, "pres", action.Company, 6); err != nil {
-		t.Fatalf("player pres failed to purchase remaining stock: %v", err)
+	game.TurnOrder = []string{"pres"}
+	if errs := buyStock(t, game, "pres", action.Company, 6); len(errs) > 0 {
+		t.Fatalf("player pres failed to purchase remaining stock: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "pres" {
 		t.Fatalf("player pres buying remaining stock left president as %q", president)
 	}
 
-	if err := sellStock(t, game, "pres", action.Company, 2); err != nil {
-		t.Fatalf("pres failed to sell part of their stock: %v", err)
+	if errs := sellStock(t, game, "pres", action.Company, 2); len(errs) > 0 {
+		t.Fatalf("pres failed to sell part of their stock: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "pres" {
 		t.Fatalf("selling enough stock to tie other player changed president to %q", president)
 	}
 
-	if err := sellStock(t, game, "pres", action.Company, 2); err != nil {
-		t.Fatalf("pres failed to sell part of their stock: %v", err)
+	if errs := sellStock(t, game, "pres", action.Company, 2); len(errs) > 0 {
+		t.Fatalf("pres failed to sell part of their stock: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "other" {
 		t.Fatalf("selling enough stock to lose to other player left president as %q", president)
 	}
