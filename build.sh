@@ -64,7 +64,7 @@ fi
 go get ${v_flag:-} -u github.com/jteeuwen/go-bindata/...
 go-bindata ${flag:-} -o "${GOPATH}/src/bo_server/bindata.go" -prefix "${GOPATH}/public" "${GOPATH}/public/..."
 
-if !_dev; then
+if ! $_dev; then
   ${GOPATH}/test.sh ${v_flag}
 fi
 
