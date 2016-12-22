@@ -151,7 +151,7 @@ func TestMarketPhaseEnd(t *testing.T) {
 	if game.Passes != 0 {
 		t.Fatalf("new game started off with market turn passes: %v", game.Passes)
 	}
-	if game.Turn != 0 {
+	if game.TurnNumber != 0 {
 		t.Fatalf("new game started off with market turn passes: %v", game.Passes)
 	}
 
@@ -165,7 +165,7 @@ func TestMarketPhaseEnd(t *testing.T) {
 	orphanCompany.StockPrice = origPrice
 	game.OrphanStocks[orphanCompany.Name] = 2
 
-	turn := game.Turn
+	turn := game.TurnNumber
 	endTurn := func(pass bool) {
 		game.endMarketTurn(pass)
 		turn += 1
@@ -173,10 +173,10 @@ func TestMarketPhaseEnd(t *testing.T) {
 			t.Fatalf("market phase ended prematurely after turn %d with %d players",
 				turn, playerCnt)
 		}
-		if game.Turn != turn {
+		if game.TurnNumber != turn {
 			t.Errorf("game turn counter %d and test turn counter %d disagree",
-				game.Turn, turn)
-			turn = game.Turn
+				game.TurnNumber, turn)
+			turn = game.TurnNumber
 		}
 		if orphanCompany.StockPrice != origPrice {
 			t.Errorf("orphan company stock changed prematurely: %d -> %d",

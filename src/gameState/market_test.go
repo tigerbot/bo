@@ -75,15 +75,15 @@ func TestMarketPlayerValidation(t *testing.T) {
 	}
 
 	for turn, actual := range game.TurnOrder {
-		if turn != game.Turn {
-			t.Fatalf("internal game turn %d != expected turn %d", game.Turn, turn)
+		if turn != game.TurnNumber {
+			t.Fatalf("internal game turn %d != expected turn %d", game.TurnNumber, turn)
 		}
 		for index := range rand.Perm(len(playerNames)) {
 			if other := playerNames[index]; other != actual {
 				if errs := game.PerformMarketTurn(other, MarketTurn{}); len(errs) == 0 {
 					t.Errorf("%s's market action succeeded on %s's turn", other, actual)
 				}
-				if turn != game.Turn {
+				if turn != game.TurnNumber {
 					t.Errorf("turn advanced from %s's action on %s's turn", other, actual)
 				}
 			}
@@ -136,11 +136,11 @@ func TestMarketActionValidation(t *testing.T) {
 	// Make sure the validation sets the price if we don't set it, and that the correct price
 	// doesn't error when we provide it.
 	action := MarketAction{Company: companyName, Count: 1}
-	if _, err := game.validateAction(&action); err != nil {
+	if _, err := game.validateMarketAction(&action); err != nil {
 		t.Errorf("market action %+v failed validation: %v", action, err)
 	} else if action.Price != price {
 		t.Error("action price $%d != expected stock price $%d", action.Price, price)
-	} else if _, err = game.validateAction(&action); err != nil {
+	} else if _, err = game.validateMarketAction(&action); err != nil {
 		t.Errorf("market action %+v failed validation: %v", action, err)
 	}
 }

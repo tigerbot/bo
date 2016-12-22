@@ -9,7 +9,7 @@ import (
 )
 
 func (g *GlobalState) timeString() string {
-	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.Turn)
+	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.TurnNumber)
 }
 
 func (g *GlobalState) marketPhase() bool {
@@ -20,13 +20,13 @@ func (g *GlobalState) businessPhase() bool {
 }
 
 func (g *GlobalState) currentTurn() string {
-	return g.TurnOrder[g.Turn%len(g.TurnOrder)]
+	return g.TurnOrder[g.TurnNumber%len(g.TurnOrder)]
 }
 
 func (g *Game) beginMarketPhase() {
 	g.Round += 1
 	g.Phase = 0
-	g.Turn = 0
+	g.TurnNumber = 0
 	g.Passes = 0
 
 	g.TurnOrder = make([]string, 0, len(g.Players))
@@ -38,7 +38,7 @@ func (g *Game) beginMarketPhase() {
 
 func (g *Game) beginBusinessPhase() {
 	g.Phase += 1
-	g.Turn = 0
+	g.TurnNumber = 0
 
 	g.TurnOrder = make([]string, 0, len(g.Companies))
 	for name, company := range g.Companies {
@@ -50,7 +50,7 @@ func (g *Game) beginBusinessPhase() {
 }
 
 func (g *Game) endMarketTurn(pass bool) {
-	g.Turn += 1
+	g.TurnNumber += 1
 
 	// If every player has passed (in a row) then we are finished with the market phase and need
 	// to begin the next business phase.
@@ -68,7 +68,7 @@ func (g *Game) endMarketTurn(pass bool) {
 }
 
 func (g *Game) endBusinessTurn() {
-	if g.Turn += 1; g.Turn == len(g.TurnOrder) {
+	if g.TurnNumber += 1; g.TurnNumber == len(g.TurnOrder) {
 		if g.Phase == 1 {
 			g.beginBusinessPhase()
 		} else {

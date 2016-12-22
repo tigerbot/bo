@@ -225,6 +225,9 @@ func TestStockBuyWithSaleProfit(t *testing.T) {
 	if errs := startCompany(t, game, company1, 6, 60); len(errs) > 0 {
 		t.Fatalf("failed to make the first purchase: %v", errs)
 	}
+	// Get rid of all the players remaining cash so there's no way the rest of the buys
+	// will work without the money from the sale of previously bought stock.
+	game.Players[playerName].Cash = 0
 
 	turn := MarketTurn{
 		Sales: []MarketAction{
@@ -238,8 +241,8 @@ func TestStockBuyWithSaleProfit(t *testing.T) {
 
 	turn = MarketTurn{
 		Sales: []MarketAction{
-			MarketAction{Company: company1, Count: 1, Price: 60},
-			MarketAction{Company: company2, Count: 1, Price: 60},
+			MarketAction{Company: company1, Count: 1},
+			MarketAction{Company: company2, Count: 1},
 		},
 		Purchase: &MarketAction{Company: company3, Count: 2, Price: 60},
 	}

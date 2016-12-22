@@ -5,9 +5,9 @@ type GlobalState struct {
 	Round int `json:"round"`
 	Phase int `json:"phase"`
 
-	TurnOrder []string `json:"turn_order"`
-	Turn      int      `json:"-"`
-	Passes    int      `json:"-"`
+	TurnOrder  []string `json:"turn_order"`
+	TurnNumber int      `json:"-"`
+	Passes     int      `json:"-"`
 
 	TrainsBought int            `json:"trains_bought"`
 	TechLevel    int            `json:"tech_level"`
@@ -41,17 +41,28 @@ type Player struct {
 	Stocks   map[string]int `json:"stocks"`
 }
 
+// The Game struct holds all information for an active game.
 type Game struct {
 	GlobalState
 	Companies map[string]*Company
 	Players   map[string]*Player
 }
 
+// The MarketAction struct represents a single action that can be performed during the market
+// phase. It represents the sale or purchase of stock from a single company.
 type MarketAction struct {
-	Company string `json:"company,omitempty"`
-	Count   int    `json:"count,omitempty"`
-	Price   int    `json:"price,omitempty"`
+	Company string `json:"company"`
+	Count   int    `json:"count"`
+	Price   int    `json:"price"`
 }
+
+// The MarketTurn struct represents all the possibilities for what can be done in a single market
+// turn. The player can sell as many stocks as they have, but are only allowed to buy from one
+// company during a single turn.
+//
+// TODO: players should be able to use a company's treasury to recover orphaned stock from the
+// bank if they are the president. This action can only be done for one company per turn similar
+// to buying stock, and cannot be done on the same turn the player uses to manage their own stock.
 type MarketTurn struct {
 	Sales    []MarketAction `json:"sales,omitempty"`
 	Purchase *MarketAction  `json:"purchase,omitempty"`

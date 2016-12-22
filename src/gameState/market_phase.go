@@ -28,14 +28,14 @@ func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []err
 
 	saleCash := 0
 	for ind := range turn.Sales {
-		if err := g.validateSale(player, &turn.Sales[ind]); err != nil {
+		if err := g.validateStockSale(player, &turn.Sales[ind]); err != nil {
 			errs = append(errs, err)
 		} else {
 			saleCash += turn.Sales[ind].Count * turn.Sales[ind].Price
 		}
 	}
 	if turn.Purchase != nil {
-		if err := g.validateBuy(player, turn.Purchase, saleCash); err != nil {
+		if err := g.validateStockBuy(player, turn.Purchase, saleCash); err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -53,9 +53,9 @@ func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []err
 	return nil
 }
 
-// validateAction performs the basic validation common to sales and purchases. It also fills in the
-// price if the user did not provide it and the company has already been started.
-func (g *Game) validateAction(action *MarketAction) (*Company, error) {
+// validateMarketAction performs the basic validation common to sales and purchases. It also fills
+// in the price if the user did not provide it and the company has already been started.
+func (g *Game) validateMarketAction(action *MarketAction) (*Company, error) {
 	if action.Company == "" {
 		return nil, fmt.Errorf("Must specify company name to buy/sell stocks")
 	}
@@ -78,15 +78,15 @@ func (g *Game) validateAction(action *MarketAction) (*Company, error) {
 	return company, nil
 }
 
-// validateBuy checks to make sure a purchase would be valid. This includes extra validation if the
-// company has not yet been started. The function performs no actions on the player or the company
-// as the function is primarily intended to make sure all market actions for a given turn are
-// valid before any are performed.
+// validateStockBuy checks to make sure a purchase would be valid. This includes extra validation
+// if the company has not yet been started. The function performs no actions on the player or the
+// company as the function is primarily intended to make sure all market actions for a given turn
+// are valid before any are performed.
 //
 // The function accepts an extra argument specifying how much the player will earn for the sale
 // of other stock since this money should be available for the purchase of additional stock.
-func (g *Game) validateBuy(player *Player, buyInfo *MarketAction, saleCash int) error {
-	company, err := g.validateAction(buyInfo)
+func (g *Game) validateStockBuy(player *Player, buyInfo *MarketAction, saleCash int) error {
+	company, err := g.validateMarketAction(buyInfo)
 	if err != nil {
 		return err
 	}
@@ -162,10 +162,10 @@ func (g *Game) buyStock(player *Player, buyInfo MarketAction) error {
 	return nil
 }
 
-// validateSale checks to make sure a sale would be valid. It does not perform any actions, as this
-// function is primarily intended to make sure all market actions in a given turn
-func (g *Game) validateSale(player *Player, saleInfo *MarketAction) error {
-	if company, err := g.validateAction(saleInfo); err != nil {
+// validateStockSale checks to make sure a sale would be valid. It does not perform any actions,
+// as this function is primarily intended to make sure all market actions in a given turn
+func (g *Game) validateStockSale(player *Player, saleInfo *MarketAction) error {
+	if company, err := g.validateMarketAction(saleInfo); err != nil {
 		return err
 	} else if held := player.Stocks[company.Name]; held == 0 {
 		return fmt.Errorf("%s has no stock in %s", player.Name, company.Name)
