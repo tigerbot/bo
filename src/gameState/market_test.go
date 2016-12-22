@@ -93,7 +93,7 @@ func TestMarketPlayerValidation(t *testing.T) {
 				if errs := game.PerformMarketTurn(other, MarketTurn{}); len(errs) == 0 {
 					t.Errorf("%s's market action succeeded on %s's turn", other, actual)
 				}
-				if turn != game.TurnNumber {
+				if turnNum != game.TurnNumber {
 					t.Errorf("turn advanced from %s's action on %s's turn", other, actual)
 				}
 			}

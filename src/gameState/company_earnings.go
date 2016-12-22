@@ -22,6 +22,25 @@ func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings
 	if company.TurnStage != "earnings" {
 		return []error{fmt.Errorf("%s is not ready to handle its earnings", company.Name)}
 	}
+
+	if len(earnings.Serviced) == 0 {
+		cities := boardInfo.Cities(company.BuiltTrack...)
+		capacity := 0
+		for ind, count := range company.Equipment {
+			capacity += (ind + 1) * count
+		}
+
+		if len(cities) > capacity {
+			boardInfo.SortCities(cities, g.TechLevel)
+			cities = cities[:capacity]
+		}
+
+		earnings.Serviced = make([]string, len(cities))
+		for ind, city := range cities {
+			earnings.Serviced[ind] = city.Location
+		}
+	}
+
 	if errs := g.validateServicedCities(company, earnings); len(errs) > 0 {
 		return errs
 	}

@@ -1,5 +1,9 @@
 package boardInfo
 
+import (
+	"sort"
+)
+
 type City struct {
 	Location string `json:"-"`
 	Name     string `json:"name"`
@@ -190,6 +194,11 @@ func init() {
 	}
 }
 
+// StartingLocation looks the map coordinate for the specified company's starting location.
+func StartingLocation(company string) string {
+	return startingLocations[company]
+}
+
 // Cities returns a slice of all the cities that coincide with the provided map coordinates
 func Cities(mapCoords ...string) []City {
 	result := make([]City, 0, len(mapCoords)/2)
@@ -203,7 +212,23 @@ func Cities(mapCoords ...string) []City {
 	return result
 }
 
-// StartingLocation looks the map coordinate for the specified company's starting location.
-func StartingLocation(company string) string {
-	return startingLocations[company]
+func SortCities(cityList []City, techLvl int) {
+	sort.Sort(citySorter{cityList, techLvl})
+}
+
+// citySorter implements sort.Interface and sorts the list of cities based on revenue for the
+// given tech level. Cities with the highest revenues are placed in the beginning of the list.
+type citySorter struct {
+	cityList []City
+	techLvl  int
+}
+
+func (s citySorter) Len() int {
+	return len(s.cityList)
+}
+func (s citySorter) Less(i, j int) bool {
+	return s.cityList[i].Revenue[s.techLvl] < s.cityList[j].Revenue[s.techLvl]
+}
+func (s citySorter) Swap(i, j int) {
+	s.cityList[i], s.cityList[j] = s.cityList[j], s.cityList[i]
 }
