@@ -77,6 +77,45 @@ func TilesAdjacent(coordA, coordB string) bool {
 	return rowDiff+colDiff == 2
 }
 
+// tileConnected checks if a map coordinate has any adjacent tiles within a list of coordinates.
+func tileConnected(coord string, blob []string) bool {
+	for _, value := range blob {
+		if TilesAdjacent(coord, value) {
+			return true
+		}
+	}
+	return false
+}
+
+// TilesContiguous checks if there would be an unbroken path from each coordinate in update to
+// the coordinates in existent if all tiles in both lists were colored. No checking is done on
+// the existent coordinates.
+//
+// This is a recursive function. If in any given call, there are coordinates that were not adjacent
+// to any in the existent list there is no point in checking those relations again, so we create
+// a new existent list with the updates that were established as contiguous and check the ones
+// that have not yet been confirm against them.
+func TilesContiguous(existent, update []string) bool {
+	connected := make([]string, 0, len(update))
+	isolated := make([]string, 0, len(update))
+	for _, coord := range update {
+		if tileConnected(coord, existent) {
+			connected = append(connected, coord)
+		} else {
+			isolated = append(isolated, coord)
+		}
+	}
+
+	if len(isolated) == 0 {
+		// All tiles have been confirmed as connected, return true
+		return true
+	} else if len(connected) == 0 {
+		// No addition tiles were establish as connected so there's nothing left to check
+		return false
+	}
+	return TilesContiguous(connected, isolated)
+}
+
 // TechLevel converts the number of trains that have been bought during the game into the
 // tech level. The conversion is rather simple, and this is its own function just to make
 // sure that all the places that need to determine the tech level are consistent.

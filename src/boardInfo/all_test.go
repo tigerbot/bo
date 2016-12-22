@@ -115,6 +115,40 @@ func TestTileAdjacency(t *testing.T) {
 	}
 }
 
+func TestTileContinuity(t *testing.T) {
+	type testSet struct {
+		existent, updates []string
+		connected         bool
+	}
+	testVals := []testSet{
+		{
+			existent:  []string{"I0"},
+			updates:   []string{"I2", "I4", "I6", "I8", "H9", "G8", "F7"},
+			connected: true,
+		},
+		{
+			existent:  []string{"G24", "G22", "G20"},
+			updates:   []string{"G26", "G28", "H19", "H17", "G16"},
+			connected: true,
+		},
+		{
+			existent:  []string{"K6", "K8", "J7"},
+			updates:   []string{"C20", "I6", "D21"},
+			connected: false,
+		},
+	}
+
+	for _, set := range testVals {
+		if set.connected != TilesContiguous(set.existent, set.updates) {
+			if set.connected {
+				t.Errorf("expected %q and %q to be contiguous", set.existent, set.updates)
+			} else {
+				t.Errorf("did not expect %q to be contiguous with %q", set.updates, set.existent)
+			}
+		}
+	}
+}
+
 func TestStartingCity(t *testing.T) {
 	type testPair struct{ company, hexcoord string }
 	testVals := []testPair{
