@@ -51,7 +51,7 @@
 			callback(err, null);
 		};
 		options.success = function (resp) {
-			callback(null, resp);
+			callback(resp.errors, resp.result);
 		};
 
 		return reqwest(options);

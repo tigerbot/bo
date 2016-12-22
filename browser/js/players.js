@@ -23,7 +23,7 @@
 		});
 	}
 
-	common.request('players', function (err, result) {
+	common.request('/game/players', function (err, result) {
 		if (err) {
 			console.error('failed to get initial player info', err);
 			return;

@@ -52,7 +52,7 @@
 		return result;
 	}
 
-	common.request('companies', function (err, result) {
+	common.request('/game/companies', function (err, result) {
 		if (err) {
 			console.error('failed to get initial company info', err);
 			return;

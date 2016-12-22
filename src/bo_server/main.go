@@ -8,13 +8,29 @@ import (
 	"github.com/gorilla/mux"
 
 	"boardInfo"
-	"gameState"
 )
 
-var activeGame *gameState.Game
+type jsonResponse struct {
+	status int         `json:"-"`
+	Errors []string    `json:"errors"`
+	Result interface{} `json:"result"`
+}
+
+func writeJson(data *jsonResponse, writer http.ResponseWriter) {
+	if buf, err := json.Marshal(data); err != nil {
+		writer.WriteHeader(500)
+		writer.Write([]byte(err.Error()))
+	} else {
+		writer.Header().Set("Content-Type", "application/json")
+		if data.status != 0 {
+			writer.WriteHeader(data.status)
+		}
+		writer.Write(buf)
+	}
+}
 
 func init() {
-	activeGame = gameState.NewGame([]string{
+	addNewGame("game", []string{
 		"Player 1",
 		"Player 2",
 		"Player 3",
@@ -24,45 +40,28 @@ func init() {
 	})
 }
 
-func getboardInfo(w http.ResponseWriter, r *http.Request) {
+func getboardInfo(writer http.ResponseWriter, request *http.Request) {
+	data := jsonResponse{}
+	defer writeJson(&data, writer)
+
 	if buf, err := boardInfo.JsonMap(); err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		data.status = 500
+		data.Errors = []string{err.Error()}
 	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(buf)
-	}
-}
-
-func getPlayers(w http.ResponseWriter, r *http.Request) {
-	if buf, err := json.Marshal(activeGame.Players); err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(buf)
-	}
-}
-
-func getCompanies(w http.ResponseWriter, r *http.Request) {
-	if buf, err := json.Marshal(activeGame.Companies); err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(buf)
+		data.Result = (*json.RawMessage)(&buf)
 	}
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/board_info", getboardInfo)
-	r.HandleFunc("/companies", getCompanies)
-	r.HandleFunc("/players", getPlayers)
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(AssetFS{})))
+	router := mux.NewRouter()
+	initializeGameRoutes(router)
+
+	static := router.Methods("GET").Subrouter()
+	static.HandleFunc("/board_info", getboardInfo)
+	static.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(AssetFS{})))
 
 	svr := http.Server{
-		Handler: r,
+		Handler: router,
 		Addr:    ":8000",
 
 		WriteTimeout: 15 * time.Second,
