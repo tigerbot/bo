@@ -35,12 +35,12 @@ var stockPrices = []int{
 
 func NextStockPrice(curPrice int) int {
 	ind := sort.SearchInts(stockPrices, curPrice)
-	if stockPrices[ind] == curPrice && ind+1 < len(stockPrices) {
-		return stockPrices[ind+1]
-	} else if ind < len(stockPrices) {
-		return stockPrices[ind]
-	} else {
+	if ind >= len(stockPrices) {
 		return stockPrices[len(stockPrices)-1]
+	} else if stockPrices[ind] == curPrice && ind+1 < len(stockPrices) {
+		return stockPrices[ind+1]
+	} else {
+		return stockPrices[ind]
 	}
 }
 

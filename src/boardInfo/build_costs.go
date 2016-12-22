@@ -106,3 +106,18 @@ var buildCosts = map[string]int{
 func BuildCost(hexCoord string) int {
 	return buildCosts[hexCoord]
 }
+
+// TrainCost calculates the cost of the number-th train that can be bought in the game. The
+// pattern for the train cost is that the first train of a given tech level is the most expensive,
+// with each subsequent one decreasing in price from the previous by 5*tech level. The cheapest
+// (last) train of a given tech level is also the same price as the most expensive (first) train
+// of the previous tech level.
+func TrainCost(number int) int {
+	// First find out what tech level we are in, then figure out the first of the first train
+	// of that tech level. This can be calculated by using the formula for triangle numbers
+	// adjusted for the number of trains in each level and the base change between each train,
+	// added to the cost of the cheapest train (last one of first tech level)
+	techLvl := TechLevel(number)
+	firstCost := 80 + 20*techLvl*(techLvl+1)/2
+	return firstCost - 5*techLvl*((number-1)%5)
+}
