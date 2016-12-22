@@ -20,6 +20,7 @@ type Company struct {
 	Name       string `json:"-"`
 	Restricted bool   `json:"restricted"`
 	President  string `json:"president"`
+	TurnStage  string `json:"turn_stage,omitempty"`
 
 	StockPrice  int    `json:"stock_price"`
 	PriceChange string `json:"price_changed"`
@@ -77,4 +78,11 @@ type CompanyInventory struct {
 	Buy   int      `json:"buy_equipment"`
 	Track []string `json:"build_track"`
 	Coal  string   `json:"mine_coal"`
+}
+
+// CompanyEarning represents everything about a company's earning that a president can control.
+// If the Serviced array is left empty cities are chosen automatically to maximize gross income.
+type CompanyEarnings struct {
+	Serviced  []string `json:"serviced_cities"`
+	Dividends bool     `json:"pay_dividends"`
 }

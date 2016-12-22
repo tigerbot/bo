@@ -157,12 +157,11 @@ func TestMarketPhaseEnd(t *testing.T) {
 
 	// Create an orphan company to make sure its stock price is reduced only at the end.
 	const origPrice = 200
-	var orphanCompany *Company
-	for _, company := range game.Companies {
-		orphanCompany = company
-		break
-	}
+	orphanCompany := game.Companies[randomCompany()]
 	orphanCompany.StockPrice = origPrice
+	orphanCompany.HeldStock = 6
+	orphanCompany.President = game.TurnOrder[0]
+	game.Players[orphanCompany.President].Stocks[orphanCompany.Name] = 2
 	game.OrphanStocks[orphanCompany.Name] = 2
 
 	turn := game.TurnNumber

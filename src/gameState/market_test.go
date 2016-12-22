@@ -51,6 +51,9 @@ func testMarketTurn(t *testing.T, game *Game, playerName string, turn MarketTurn
 // the market phase.
 func TestMarketActionPhaseValidation(t *testing.T) {
 	game := NewGame([]string{"1st", "2nd", "3rd", "4th"})
+	// start a company to make sure we aren't operating with an empty turn order list
+	// (which should never happen in a real game)
+	startCompany(t, game, randomCompany(false), 1, startingPrices[0][0])
 	game.beginBusinessPhase()
 
 	if game.marketPhase() {
@@ -67,6 +70,13 @@ func TestMarketActionPhaseValidation(t *testing.T) {
 func TestMarketPlayerValidation(t *testing.T) {
 	playerNames := []string{"1st", "2nd", "3rd", "4th", "5th", "6th"}
 	game := NewGame(playerNames)
+	turn := MarketTurn{
+		Purchase: &MarketAction{
+			Company: randomCompany(false),
+			Count:   1,
+			Price:   startingPrices[0][0],
+		},
+	}
 
 	// This part of the test must come first, otherwise we will no longer be in the market phase
 	// and this would no longer check player name existence.
@@ -74,8 +84,8 @@ func TestMarketPlayerValidation(t *testing.T) {
 		t.Error("bad player name did not error performing market action")
 	}
 
-	for turn, actual := range game.TurnOrder {
-		if turn != game.TurnNumber {
+	for turnNum, actual := range game.TurnOrder {
+		if turnNum != game.TurnNumber {
 			t.Fatalf("internal game turn %d != expected turn %d", game.TurnNumber, turn)
 		}
 		for index := range rand.Perm(len(playerNames)) {
@@ -88,7 +98,7 @@ func TestMarketPlayerValidation(t *testing.T) {
 				}
 			}
 		}
-		if errs := game.PerformMarketTurn(actual, MarketTurn{}); len(errs) > 0 {
+		if errs := game.PerformMarketTurn(actual, turn); len(errs) > 0 {
 			t.Errorf("%s failed to perform their market action: %v", actual, errs)
 		}
 	}

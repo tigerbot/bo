@@ -10,7 +10,7 @@ function usage() {
   echo "  -s, --short       pass the short flag into the go test to skip longer tests"
 }
 
-TEST_FLAGS=""
+TEST_FLAGS="-cover"
 function setArgs() {
   while [ "${1:-}" != "" ]; do
     case $1 in

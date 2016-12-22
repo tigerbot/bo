@@ -17,16 +17,20 @@ func stringInSlice(value string, slice []string) bool {
 }
 
 func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory) (errs []error) {
+	company := g.Companies[g.currentTurn()]
 	defer func() {
 		if len(errs) == 0 {
-			g.endBusinessTurn()
+			company.TurnStage = "earnings"
 		}
 	}()
 
-	company := g.Companies[g.currentTurn()]
 	if playerName != company.President {
 		return []error{
-			fmt.Errorf("It's %s's turn and %s is the president", company.Name, company.President)}
+			fmt.Errorf("It's %s's turn and %s is the president", company.Name, company.President),
+		}
+	}
+	if company.TurnStage != "inventory" {
+		return []error{fmt.Errorf("%s has already updated its inventory", company.Name)}
 	}
 
 	errs = append(errs, g.validateBusinessExpense(company, update)...)
