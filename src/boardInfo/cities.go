@@ -1,8 +1,9 @@
 package boardInfo
 
 type City struct {
-	Name    string `json:"name"`
-	Revenue [6]int `json:"revenue"`
+	Location string `json:"-"`
+	Name     string `json:"name"`
+	Revenue  [6]int `json:"revenue"`
 
 	Exception string `json:"exception,omitempty"`
 	Starting  string `json:"starting,omitempty"`
@@ -176,6 +177,13 @@ var startingLocations map[string]string
 func init() {
 	startingLocations = make(map[string]string, 10)
 	for coord, val := range cities {
+		// In order to contain the location in the struct and not require having two duplicate
+		// values in the map definition we assign it here. Golang does not allow us to assign
+		// to members directory in the map, so we have to modify the value and overwrite the
+		// previous map entry with the modified one.
+		val.Location = coord
+		cities[coord] = val
+
 		if val.Starting != "" {
 			startingLocations[val.Starting] = coord
 		}

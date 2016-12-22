@@ -33,7 +33,7 @@ func NewGame(playerNames []string) *Game {
 		result.Companies[name].Restricted = start.tech3
 		result.Companies[name].PriceChange = start.sort
 		result.Companies[name].UnbuiltTrack = start.tracks
-		result.Companies[name].BuiltTrack = []string{}
+		result.Companies[name].BuiltTrack = make([]string, 0, start.tracks)
 	}
 
 	startingCash := 1500 / len(playerNames)

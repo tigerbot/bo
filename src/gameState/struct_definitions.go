@@ -67,3 +67,14 @@ type MarketTurn struct {
 	Sales    []MarketAction `json:"sales,omitempty"`
 	Purchase *MarketAction  `json:"purchase,omitempty"`
 }
+
+// CompanyInventory represents all the available actions available to a company that effect it's
+// inventory during the first part of its business phase turn. It is separate from the income
+// part of the turn because that part depends heavily on the results of this part and would require
+// much more complicated validation given the requirement that errors cannot affect the game.
+type CompanyInventory struct {
+	Scrap [6]int   `json:"scrap_equipment"`
+	Buy   int      `json:"buy_equipment"`
+	Track []string `json:"build_track"`
+	Coal  string   `json:"mine_coal"`
+}
