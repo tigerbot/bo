@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
-	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
 
 	"boardInfo"
@@ -55,12 +55,18 @@ func getCompanies(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	staticFS := &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, AssetInfo: AssetInfo}
 	r := mux.NewRouter()
 	r.HandleFunc("/board_info", getboardInfo)
 	r.HandleFunc("/companies", getCompanies)
 	r.HandleFunc("/players", getPlayers)
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(staticFS)))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(AssetFS{})))
 
-	http.ListenAndServe(":8000", r)
+	svr := http.Server{
+		Handler: r,
+		Addr:    ":8000",
+
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	panic(svr.ListenAndServe())
 }
