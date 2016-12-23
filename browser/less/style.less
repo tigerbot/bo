@@ -1,5 +1,6 @@
 @company-width: 280px;
 @player-width: 290px;
+@state-height: 250px;
 
 body {
 	background-color: rgb(222, 239, 247);
@@ -127,7 +128,7 @@ body {
 #player-list {
 	position: absolute;
 	top: 0px;
-	bottom: 0px;
+	bottom: @state-height;
 	right: 0px;
 	width: @player-width;
 	overflow-y: auto;
@@ -149,30 +150,54 @@ body {
 			padding: 5px;
 		}
 	}
+}
 
-	.stocks {
-		> div {
-			font-weight: bold;
-		}
-		table {
-			margin-left: 15px;
-			border: 2px solid black;
-			border-spacing: 0px;
-			border-collapse: collapse;
-		}
-		tr {
-			.shadow-gradient;
-		}
-		th, td {
-			border: 1px solid black;
-			padding: 2px 10px;
-			text-align: center;
-		}
-		th {
-			width: 140px;
-		}
-		td {
-			width: 40px;
-		}
+#game-state {
+	position: absolute;
+	height: @state-height;
+	bottom: 0px;
+	right: 0px;
+	width: @player-width;
+	overflow-y: auto;
+
+	background: radial-gradient(circle,
+		rgb(254, 240, 211)   0%,
+		rgb(250, 236, 207)  30%,
+		rgb(220, 206, 177) 100%
+	);
+	text-shadow: 0 0 8px white;
+	padding: 5px 0px;
+	border: 2px solid black;
+
+	> div {
+		padding-top:     5px;
+		padding-bottom:  2px;
+		margin-left:    20px;
+	}
+}
+
+.stocks {
+	> div {
+		font-weight: bold;
+	}
+	table {
+		margin-left: 15px;
+		border: 2px solid black;
+		border-spacing: 0px;
+		border-collapse: collapse;
+	}
+	tr {
+		.shadow-gradient;
+	}
+	th, td {
+		border: 1px solid black;
+		padding: 2px 10px;
+		text-align: center;
+	}
+	th {
+		width: 140px;
+	}
+	td {
+		width: 40px;
 	}
 }

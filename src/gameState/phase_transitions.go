@@ -8,6 +8,19 @@ import (
 	"boardInfo"
 )
 
+func (n phaseNum) MarshalJSON() ([]byte, error) {
+	result := ""
+	switch n {
+	case 0:
+		result = `"Market"`
+	case 1:
+		result = `"Business 1"`
+	case 2:
+		result = `"Business 2"`
+	}
+	return []byte(result), nil
+}
+
 func (g *GlobalState) timeString() string {
 	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.TurnNumber)
 }

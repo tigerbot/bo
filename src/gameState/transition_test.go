@@ -232,7 +232,7 @@ func TestBusinessPhaseEnd(t *testing.T) {
 		t.Fatalf("expected 4 items in the turn order: %v", game.TurnOrder)
 	}
 
-	checkTurnEndState := func(callNum, round, phase int, business bool) {
+	checkTurnEndState := func(callNum, round int, phase phaseNum, business bool) {
 		game.endBusinessTurn()
 		if business != game.businessPhase() {
 			t.Errorf("expected businessPhase to be %v after %d calls", business, callNum)
