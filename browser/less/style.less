@@ -157,7 +157,8 @@ body {
 	height: @state-height;
 	bottom: 0px;
 	right: 0px;
-	width: @player-width;
+	// We subtract by 4 to account for the difference in what elements have the border.
+	width: @player-width - 4;
 	overflow-y: auto;
 
 	background: radial-gradient(circle,
@@ -172,7 +173,8 @@ body {
 	> div {
 		padding-top:     5px;
 		padding-bottom:  2px;
-		margin-left:    20px;
+		margin-left:    10px;
+		&:not(:first-child) { margin-top: 7px; }
 	}
 }
 
@@ -199,5 +201,31 @@ body {
 	}
 	td {
 		width: 40px;
+	}
+}
+
+.equipment-costs {
+	> div {
+		font-weight: bold;
+	}
+	table {
+		margin: auto;
+		border: 2px solid black;
+		border-spacing: 0px;
+		border-collapse: collapse;
+	}
+	tr {
+		.shadow-gradient;
+	}
+	th, td {
+		border: 1px solid black;
+		text-align: center;
+	}
+	th {
+		padding: 2px 6px;
+	}
+	td {
+		padding: 2px 3px;
+		&.bought { background-color: rgba(0, 0, 0, 0.45) }
 	}
 }

@@ -121,3 +121,12 @@ func TrainCost(number int) int {
 	firstCost := 80 + 20*techLvl*(techLvl+1)/2
 	return firstCost - 5*techLvl*((number-1)%5)
 }
+
+func AllTrainCosts() (result [6][5]int) {
+	for lvl := range result {
+		for num := range result[lvl] {
+			result[lvl][num] = TrainCost(5*lvl + num + 1)
+		}
+	}
+	return
+}

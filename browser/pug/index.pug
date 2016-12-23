@@ -76,6 +76,17 @@ html(lang="en")
 					span(data-bind='text: phase')
 				span Round:
 					span(data-bind='text: round')
+			div.equipment-costs
+				div Equipment Costs:
+				table
+					tbody
+						// ko foreach: { data: train_costs }
+						tr
+							th(data-bind='text: name')
+							// ko foreach: { data: costs }
+							td(data-bind='text: value, css: {bought: number < trains_bought()}')
+							// /ko
+						// /ko
 			div.stocks
 				div Orphan Stocks:
 				table

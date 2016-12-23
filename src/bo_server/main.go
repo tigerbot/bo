@@ -73,12 +73,17 @@ func getboardInfo(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func getTrainCosts(writer http.ResponseWriter, request *http.Request) {
+	writeJson(&jsonResponse{Result: boardInfo.AllTrainCosts()}, writer)
+}
+
 func main() {
 	router := mux.NewRouter()
 	initializeGameRoutes(router)
 
 	static := router.Methods("GET").Subrouter()
 	static.HandleFunc("/board_info", getboardInfo)
+	static.HandleFunc("/train_costs", getTrainCosts)
 	static.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(AssetFS{})))
 
 	svr := http.Server{

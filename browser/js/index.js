@@ -15,16 +15,49 @@
 
 		tech_level:    ko.observable(1),
 		trains_bought: ko.observable(0),
+		all_costs:     ko.observableArray([]),
 
 		orphan_stocks: ko.observableArray([]),
 	};
+	game_state.train_costs = ko.computed(function () {
+		var tech_level = this.tech_level();
+		var all_costs  = this.all_costs();
+		var result = [];
+
+		if (tech_level <= all_costs.length) {
+			result.push(all_costs[tech_level-1]);
+		}
+		if (tech_level < all_costs.length) {
+			result.push(all_costs[tech_level]);
+		}
+
+		return result;
+	}, game_state);
 
 	domready(function () {
 		ko.applyBindings(game_state, document.getElementById('game-state'));
 	});
-	common.request('/game/state',function (err, repsonse) {
+	common.request('/train_costs', function (err, repsonse) {
 		if (err) {
-			console.error('failed to get game global state');
+			console.error('failed to get equipment costs', err);
+			return;
+		}
+		game_state.all_costs(repsonse.map(function (costs, lvl) {
+			return {
+				name:  'Tech ' + (lvl+1),
+				costs: costs.map(function (value, num) {
+					return {
+						value:         '$'+value,
+						number:        lvl*costs.length + num,
+						trains_bought: game_state.trains_bought,
+					};
+				}),
+			};
+		}));
+	});
+	common.request('/game/state', function (err, repsonse) {
+		if (err) {
+			console.error('failed to get game global state', err);
 			return;
 		}
 
