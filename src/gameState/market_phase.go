@@ -6,27 +6,20 @@ import (
 	"boardInfo"
 )
 
-func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []error) {
-	defer func() {
-		// If there was no error when we returned that means this action succeeded and its the
-		// next player's turn.
-		if len(errs) == 0 {
-			g.endMarketTurn(len(turn.Sales) == 0 && turn.Purchase == nil)
-		}
-	}()
-
-	if !g.marketPhase() {
+func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) []error {
+	if !g.Phase.Market() {
 		return []error{fmt.Errorf("Must be in market phase to perform market actions")}
 	}
 
 	player := g.Players[playerName]
 	if player == nil {
 		return []error{fmt.Errorf("No player with name %q", playerName)}
-	} else if expected := g.currentTurn(); playerName != expected {
+	} else if expected := g.TurnManager.Current(); playerName != expected {
 		return []error{fmt.Errorf("It is currently player %s's turn", expected)}
 	}
 
 	saleCash := 0
+	var errs []error
 	for ind := range turn.Sales {
 		if err := g.validateStockSale(player, &turn.Sales[ind]); err != nil {
 			errs = append(errs, err)
@@ -40,7 +33,7 @@ func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []err
 		}
 	}
 	if len(errs) > 0 {
-		return
+		return errs
 	}
 
 	for _, saleInfo := range turn.Sales {
@@ -50,6 +43,7 @@ func (g *Game) PerformMarketTurn(playerName string, turn MarketTurn) (errs []err
 		g.buyStock(player, *turn.Purchase)
 	}
 
+	g.endMarketTurn(len(turn.Sales) == 0 && turn.Purchase == nil)
 	return nil
 }
 

@@ -53,12 +53,14 @@ func TestMarketActionPhaseValidation(t *testing.T) {
 	game := NewGame([]string{"1st", "2nd", "3rd", "4th"})
 	// start a company to make sure we aren't operating with an empty turn order list
 	// (which should never happen in a real game)
-	startCompany(t, game, randomCompany(false), 1, startingPrices[0][0])
+	if errs := startCompany(t, game, randomCompany(false), 1, startingPrices[0][0]); len(errs) > 0 {
+		t.Errorf("failed to start initial company to avoid panic: %v", errs)
+	}
 	game.beginBusinessPhase()
 
-	if game.marketPhase() {
+	if game.Phase.Market() {
 		t.Fatal("game unexpected in market phase")
-	} else if !game.businessPhase() {
+	} else if !game.Phase.Business() {
 		t.Fatal("game not in a valid phase state")
 	} else if errs := game.PerformMarketTurn("1st", MarketTurn{}); len(errs) == 0 {
 		t.Error("market action did not fail while in the business phase")
@@ -84,16 +86,16 @@ func TestMarketPlayerValidation(t *testing.T) {
 		t.Error("bad player name did not error performing market action")
 	}
 
-	for turnNum, actual := range game.TurnOrder {
-		if turnNum != game.TurnNumber {
-			t.Fatalf("internal game turn %d != expected turn %d", game.TurnNumber, turn)
+	for turnNum, actual := range game.TurnManager.Order {
+		if turnNum != game.TurnManager.Number {
+			t.Fatalf("internal game turn %d != expected turn %d", game.TurnManager.Number, turn)
 		}
 		for index := range rand.Perm(len(playerNames)) {
 			if other := playerNames[index]; other != actual {
 				if errs := game.PerformMarketTurn(other, MarketTurn{}); len(errs) == 0 {
 					t.Errorf("%s's market action succeeded on %s's turn", other, actual)
 				}
-				if turnNum != game.TurnNumber {
+				if turnNum != game.TurnManager.Number {
 					t.Errorf("turn advanced from %s's action on %s's turn", other, actual)
 				}
 			}
@@ -114,7 +116,7 @@ func TestMarketActionValidation(t *testing.T) {
 
 	// This just make the code shorter to fit the if statements on one line < 100 columns
 	validateAction := func(action MarketAction) error {
-		playerName := game.currentTurn()
+		playerName := game.TurnManager.Current()
 		var errs []error
 		if num := rand.Intn(2); num == 0 {
 			errs = game.PerformMarketTurn(playerName, MarketTurn{Sales: []MarketAction{action}})

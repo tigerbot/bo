@@ -7,14 +7,11 @@ import (
 	"boardInfo"
 )
 
-func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings) (errs []error) {
-	defer func() {
-		if len(errs) == 0 {
-			g.endBusinessTurn()
-		}
-	}()
-
-	company := g.Companies[g.currentTurn()]
+func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings) []error {
+	if !g.Phase.Business() {
+		return []error{fmt.Errorf("Must be in a business phase to perform business actions")}
+	}
+	company := g.Companies[g.TurnManager.Current()]
 	if playerName != company.President {
 		return []error{
 			fmt.Errorf("It's %s's turn and %s is the president", company.Name, company.President)}
@@ -84,7 +81,9 @@ func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings
 			player.Cash += perShare * player.Stocks[company.Name]
 		}
 	}
-	return
+
+	g.endBusinessTurn()
+	return nil
 }
 
 // validateServicedCities makes sure the company has the capability of servicing all the cities

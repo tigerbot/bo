@@ -26,7 +26,7 @@ func startCompany(t *testing.T, game *Game, company string, count, price int) []
 		Price:   price,
 	}
 
-	playerName := game.currentTurn()
+	playerName := game.TurnManager.Current()
 	cash := game.Players[playerName].Cash
 
 	if errs := testMarketTurn(t, game, playerName, MarketTurn{Purchase: &action}); len(errs) > 0 {
@@ -57,8 +57,7 @@ func startCompany(t *testing.T, game *Game, company string, count, price int) []
 func startCompanyNewGame(t *testing.T, company string, count, price, cash, techLvl int) []error {
 	game := NewGame([]string{"1st", "2nd", "3rd"})
 	game.TechLevel = techLvl
-	playerName := game.TurnOrder[0]
-	game.Players[playerName].Cash = cash
+	game.Players[game.TurnManager.Current()].Cash = cash
 
 	return startCompany(t, game, company, count, price)
 }
@@ -103,7 +102,7 @@ func TestCompanyStart(t *testing.T) {
 
 	count = 11
 	if errs := startCompanyNewGame(t, company, count, price, count*price, 1); len(errs) == 0 {
-		t.Errorf("attempt to buy %d %s shares at $%d with insufficient cash did not error",
+		t.Errorf("attempt to buy %d %s shares did not error",
 			count, company, price)
 	}
 }
@@ -157,14 +156,14 @@ func TestStartedTurnOrder(t *testing.T) {
 		}
 	}
 	for _ = range companyList {
-		if errs := game.PerformMarketTurn(game.currentTurn(), MarketTurn{}); len(errs) > 0 {
+		if errs := game.PerformMarketTurn(game.TurnManager.Current(), MarketTurn{}); len(errs) > 0 {
 			t.Fatalf("failed to pass market turn to advance phase: %v", errs)
 		}
 	}
-	if !game.businessPhase() {
+	if !game.Phase.Business() {
 		t.Fatal("failed to enter business phase")
 	}
-	if !reflect.DeepEqual(companyList, game.TurnOrder) {
-		t.Errorf("company turn order %v != starting order %v", game.TurnOrder, companyList)
+	if !reflect.DeepEqual(companyList, game.TurnManager.Order) {
+		t.Errorf("company turn order %v != starting order %v", game.TurnManager.Order, companyList)
 	}
 }

@@ -176,14 +176,14 @@ func TestStockBuyTakeover(t *testing.T) {
 
 	// Establish the initial president the other player will try to take over. Turn order changes
 	// are just to make it so we don't need the president to pass later.
-	game.TurnOrder = []string{"pres"}
+	game.TurnManager.Order = []string{"pres"}
 	if errs := startCompany(t, game, action.Company, action.Count, action.Price); len(errs) > 0 {
 		t.Fatalf("failed to establish initial president: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "pres" {
 		t.Fatalf("expected company president to be pres, but is instead %q", president)
 	}
 
-	game.TurnOrder = []string{"other"}
+	game.TurnManager.Order = []string{"other"}
 	if errs := buyStock(t, game, "other", action.Company, 2); len(errs) > 0 {
 		t.Fatalf("other player failed to purchase additional stock: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "pres" {

@@ -2,14 +2,17 @@ package gameState
 
 type phaseNum int
 
+type TurnManager struct {
+	Order  []string
+	Number int
+	Passes int
+}
+
 // The GlobalState struct holds all general board game state.
 type GlobalState struct {
-	Round int      `json:"round"`
-	Phase phaseNum `json:"phase"`
-
-	TurnOrder  []string `json:"turn_order"`
-	TurnNumber int      `json:"-"`
-	Passes     int      `json:"-"`
+	Round       int         `json:"round"`
+	Phase       phaseNum    `json:"phase"`
+	TurnManager TurnManager `json:"turn"`
 
 	TrainsBought int            `json:"trains_bought"`
 	TechLevel    int            `json:"tech_level"`

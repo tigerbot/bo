@@ -21,7 +21,7 @@ func TestGameStart(t *testing.T) {
 	if game.Round != 1 {
 		t.Errorf("new game didn't start on round 1: %v", game.Round)
 	}
-	if !game.marketPhase() {
+	if !game.Phase.Market() {
 		t.Errorf("new game didn't start in the market phase: %v", game.Phase)
 	}
 
@@ -74,14 +74,14 @@ func TestGameStart(t *testing.T) {
 // are sorted in random order.
 func TestMarketTurnOrder(t *testing.T) {
 	game := NewGame([]string{"1st", "2nd", "3rd", "4th", "5th", "6th"})
-	prevOrder := game.TurnOrder
+	prevOrder := game.TurnManager.Order
 	for inc := 0; inc < 2; inc += 1 {
 		game.beginMarketPhase()
-		if !reflect.DeepEqual(game.TurnOrder, prevOrder) {
+		if !reflect.DeepEqual(game.TurnManager.Order, prevOrder) {
 			break
 		}
 	}
-	if reflect.DeepEqual(game.TurnOrder, prevOrder) {
+	if reflect.DeepEqual(game.TurnManager.Order, prevOrder) {
 		t.Errorf("player order %v produced repeatedly for starting players", prevOrder)
 	}
 
@@ -96,8 +96,8 @@ func TestMarketTurnOrder(t *testing.T) {
 	game.beginMarketPhase()
 
 	expected := []string{"1st", "2nd", "3rd", "4th", "5th", "6th"}
-	if !reflect.DeepEqual(game.TurnOrder, expected) {
-		t.Errorf("initial player order %v doesn't match %v", game.TurnOrder, expected)
+	if !reflect.DeepEqual(game.TurnManager.Order, expected) {
+		t.Errorf("initial player order %v doesn't match %v", game.TurnManager.Order, expected)
 	}
 }
 
@@ -120,17 +120,17 @@ func TestBusinessTurnOrder(t *testing.T) {
 	game.beginBusinessPhase()
 
 	expected := []string{"1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"}
-	if !reflect.DeepEqual(game.TurnOrder, expected) {
-		t.Errorf("initial company order %v doesn't match %v", game.TurnOrder, expected)
+	if !reflect.DeepEqual(game.TurnManager.Order, expected) {
+		t.Errorf("initial company order %v doesn't match %v", game.TurnManager.Order, expected)
 	}
 
 	game.Companies["7th"].President = ""
 	game.Companies["8th"].President = ""
 	game.beginBusinessPhase()
 	expected = []string{"1st", "2nd", "3rd", "4th", "5th", "6th", "9th"}
-	if !reflect.DeepEqual(game.TurnOrder, expected) {
+	if !reflect.DeepEqual(game.TurnManager.Order, expected) {
 		t.Errorf("company order %v doesn't match %v after presidents removed",
-			game.TurnOrder, expected)
+			game.TurnManager.Order, expected)
 	}
 }
 
@@ -145,14 +145,14 @@ func TestMarketPhaseEnd(t *testing.T) {
 	}
 	game := NewGame(playerNames)
 
-	if !game.marketPhase() {
+	if !game.Phase.Market() {
 		t.Fatalf("new game didn't start in the market phase: %v", game.Phase)
 	}
-	if game.Passes != 0 {
-		t.Fatalf("new game started off with market turn passes: %v", game.Passes)
+	if game.TurnManager.Passes != 0 {
+		t.Fatalf("new game started off with market turn passes: %v", game.TurnManager.Passes)
 	}
-	if game.TurnNumber != 0 {
-		t.Fatalf("new game started off with market turn passes: %v", game.Passes)
+	if game.TurnManager.Number != 0 {
+		t.Fatalf("new game started off with market turn passes: %v", game.TurnManager.Passes)
 	}
 
 	// Create an orphan company to make sure its stock price is reduced only at the end.
@@ -160,22 +160,22 @@ func TestMarketPhaseEnd(t *testing.T) {
 	orphanCompany := game.Companies[randomCompany()]
 	orphanCompany.StockPrice = origPrice
 	orphanCompany.HeldStock = 6
-	orphanCompany.President = game.TurnOrder[0]
+	orphanCompany.President = game.TurnManager.Order[0]
 	game.Players[orphanCompany.President].Stocks[orphanCompany.Name] = 2
 	game.OrphanStocks[orphanCompany.Name] = 2
 
-	turn := game.TurnNumber
+	turn := game.TurnManager.Number
 	endTurn := func(pass bool) {
 		game.endMarketTurn(pass)
 		turn += 1
-		if !game.marketPhase() {
+		if !game.Phase.Market() {
 			t.Fatalf("market phase ended prematurely after turn %d with %d players",
 				turn, playerCnt)
 		}
-		if game.TurnNumber != turn {
+		if game.TurnManager.Number != turn {
 			t.Errorf("game turn counter %d and test turn counter %d disagree",
-				game.TurnNumber, turn)
-			turn = game.TurnNumber
+				game.TurnManager.Number, turn)
+			turn = game.TurnManager.Number
 		}
 		if orphanCompany.StockPrice != origPrice {
 			t.Errorf("orphan company stock changed prematurely: %d -> %d",
@@ -196,7 +196,7 @@ func TestMarketPhaseEnd(t *testing.T) {
 		endTurn(true)
 	}
 	game.endMarketTurn(true)
-	if game.marketPhase() {
+	if game.Phase.Market() {
 		t.Fatal("market phase did not end after every player passed")
 	}
 	if orphanCompany.StockPrice >= origPrice {
@@ -221,20 +221,20 @@ func TestBusinessPhaseEnd(t *testing.T) {
 			"6th": {Name: "6th", President: "", StockPrice: 0},
 		},
 	}
-	if !game.marketPhase() {
+	if !game.Phase.Market() {
 		t.Fatal("expected game to start in market phase, but it didn't")
 	}
 
 	game.beginBusinessPhase()
-	if !game.businessPhase() {
+	if !game.Phase.Business() {
 		t.Fatalf("did not enter business phase after calling beginBusinessPhase: %v", game.Phase)
-	} else if len(game.TurnOrder) != 4 {
-		t.Fatalf("expected 4 items in the turn order: %v", game.TurnOrder)
+	} else if len(game.TurnManager.Order) != 4 {
+		t.Fatalf("expected 4 items in the turn order: %v", game.TurnManager.Order)
 	}
 
 	checkTurnEndState := func(callNum, round int, phase phaseNum, business bool) {
 		game.endBusinessTurn()
-		if business != game.businessPhase() {
+		if business != game.Phase.Business() {
 			t.Errorf("expected businessPhase to be %v after %d calls", business, callNum)
 		} else if phase != game.Phase {
 			t.Errorf("expected phase %d after %d calls, found %d", phase, callNum, game.Phase)

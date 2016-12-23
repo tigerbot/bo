@@ -97,12 +97,12 @@ func TestStockSellStepdown(t *testing.T) {
 	game.Players["pres"].Cash = 6 * action.Price
 	game.Players["other"].Cash = 4 * action.Price
 
-	game.TurnOrder = []string{"other"}
+	game.TurnManager.Order = []string{"other"}
 	if errs := startCompany(t, game, action.Company, action.Count, action.Price); len(errs) > 0 {
 		t.Fatalf("initial stock purchase failed: %v", errs)
 	}
 
-	game.TurnOrder = []string{"pres"}
+	game.TurnManager.Order = []string{"pres"}
 	if errs := buyStock(t, game, "pres", action.Company, 6); len(errs) > 0 {
 		t.Fatalf("player pres failed to purchase remaining stock: %v", errs)
 	} else if president := game.Companies[action.Company].President; president != "pres" {

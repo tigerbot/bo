@@ -21,57 +21,63 @@ func (n phaseNum) MarshalJSON() ([]byte, error) {
 	return []byte(result), nil
 }
 
+func (n phaseNum) Market() bool {
+	return n == 0
+}
+func (n phaseNum) Business() bool {
+	return n == 1 || n == 2
+}
+
+func (t TurnManager) Current() string {
+	if len(t.Order) == 0 {
+		return ""
+	}
+	return t.Order[t.Number%len(t.Order)]
+}
+func (t TurnManager) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%q", t.Current())), nil
+}
+
 func (g *GlobalState) timeString() string {
-	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.TurnNumber)
-}
-
-func (g *GlobalState) marketPhase() bool {
-	return g.Phase == 0
-}
-func (g *GlobalState) businessPhase() bool {
-	return g.Phase == 1 || g.Phase == 2
-}
-
-func (g *GlobalState) currentTurn() string {
-	return g.TurnOrder[g.TurnNumber%len(g.TurnOrder)]
+	return fmt.Sprintf("%02d-%02d-%02d", g.Round, g.Phase, g.TurnManager.Number)
 }
 
 func (g *Game) beginMarketPhase() {
 	g.Round += 1
 	g.Phase = 0
-	g.TurnNumber = 0
-	g.Passes = 0
 
-	g.TurnOrder = make([]string, 0, len(g.Players))
+	g.TurnManager.Number = 0
+	g.TurnManager.Passes = 0
+	g.TurnManager.Order = make([]string, 0, len(g.Players))
 	for name, _ := range g.Players {
-		g.TurnOrder = append(g.TurnOrder, name)
+		g.TurnManager.Order = append(g.TurnManager.Order, name)
 	}
-	sort.Sort(playerSorter{list: g.TurnOrder, info: g.Players})
+	sort.Sort(playerSorter{list: g.TurnManager.Order, info: g.Players})
 }
 
 func (g *Game) beginBusinessPhase() {
 	g.Phase += 1
-	g.TurnNumber = 0
+	g.TurnManager.Number = 0
 
-	g.TurnOrder = make([]string, 0, len(g.Companies))
+	g.TurnManager.Order = make([]string, 0, len(g.Companies))
 	for name, company := range g.Companies {
 		if company.President != "" {
-			g.TurnOrder = append(g.TurnOrder, name)
+			g.TurnManager.Order = append(g.TurnManager.Order, name)
 		}
 		company.TurnStage = ""
 	}
-	sort.Sort(companySorter{list: g.TurnOrder, info: g.Companies})
-	g.Companies[g.TurnOrder[0]].TurnStage = "inventory"
+	sort.Sort(companySorter{list: g.TurnManager.Order, info: g.Companies})
+	g.Companies[g.TurnManager.Order[0]].TurnStage = "inventory"
 }
 
 func (g *Game) endMarketTurn(pass bool) {
-	g.TurnNumber += 1
+	g.TurnManager.Number += 1
 
 	// If every player has passed (in a row) then we are finished with the market phase and need
 	// to begin the next business phase.
 	if !pass {
-		g.Passes = 0
-	} else if g.Passes += 1; g.Passes == len(g.TurnOrder) {
+		g.TurnManager.Passes = 0
+	} else if g.TurnManager.Passes += 1; g.TurnManager.Passes == len(g.TurnManager.Order) {
 		// Any companies that have orphaned stock by the end of the market phase have their stock
 		// prices reduced.
 		for name, _ := range g.OrphanStocks {
@@ -83,15 +89,15 @@ func (g *Game) endMarketTurn(pass bool) {
 }
 
 func (g *Game) endBusinessTurn() {
-	g.Companies[g.currentTurn()].TurnStage = ""
-	if g.TurnNumber += 1; g.TurnNumber == len(g.TurnOrder) {
+	g.Companies[g.TurnManager.Current()].TurnStage = ""
+	if g.TurnManager.Number += 1; g.TurnManager.Number == len(g.TurnManager.Order) {
 		if g.Phase == 1 {
 			g.beginBusinessPhase()
 		} else {
 			g.beginMarketPhase()
 		}
 	} else {
-		g.Companies[g.currentTurn()].TurnStage = "inventory"
+		g.Companies[g.TurnManager.Current()].TurnStage = "inventory"
 	}
 }
 

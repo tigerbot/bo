@@ -16,13 +16,11 @@ func stringInSlice(value string, slice []string) bool {
 	return false
 }
 
-func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory) (errs []error) {
-	company := g.Companies[g.currentTurn()]
-	defer func() {
-		if len(errs) == 0 {
-			company.TurnStage = "earnings"
-		}
-	}()
+func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory) []error {
+	if !g.Phase.Business() {
+		return []error{fmt.Errorf("Must be in a business phase to perform business actions")}
+	}
+	company := g.Companies[g.TurnManager.Current()]
 
 	if playerName != company.President {
 		return []error{
@@ -33,6 +31,7 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 		return []error{fmt.Errorf("%s has already updated its inventory", company.Name)}
 	}
 
+	var errs []error
 	errs = append(errs, g.validateBusinessExpense(company, update)...)
 	errs = append(errs, g.validateBuildLimits(company, update)...)
 	errs = append(errs, g.validateCityRestrictions(company, update)...)
@@ -63,6 +62,7 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 	company.UnbuiltTrack -= len(update.Track)
 	sort.Strings(company.BuiltTrack)
 
+	company.TurnStage = "earnings"
 	return nil
 }
 
