@@ -88,7 +88,7 @@ html(lang="en")
 						tr
 							th(data-bind='text: name')
 							// ko foreach: { data: costs }
-							td(data-bind='text: value, css: {bought: number < trains_bought()}')
+							td.money-value(data-bind='text: value, css: {bought: number < trains_bought()}')
 							// /ko
 						// /ko
 			div.stocks
