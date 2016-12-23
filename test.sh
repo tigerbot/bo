@@ -48,15 +48,19 @@ export GOPATH="$(cd "$(dirname "$0")" && env pwd -P)"
 unset GOBIN
 
 # not all of our packages currently have tests, so look for any directory that has
-# files ending in _test.go and only try to test those packages.
+# files ending in _test.go and only try to test those packages. We do want to know
+# which packages we aren't testing though.
+UNTESTED="$(find ${GOPATH}/src -name "*.go"      | xargs -n1 dirname | sort | uniq)"
 TESTABLE="$(find ${GOPATH}/src -name "*_test.go" | xargs -n1 dirname | sort | uniq)"
 
 # filter out any packages that aren't ours by getting rid of things in our .gitignore file
 for ignored in $(grep '^src/' ${GOPATH}/.gitignore); do
+  UNTESTED=$(grep -v ${GOPATH}/${ignored} <<< "${UNTESTED}")
   TESTABLE=$(grep -v ${GOPATH}/${ignored} <<< "${TESTABLE}")
 done
 
 # and now strip the ${GOPATH}/src prefix to produce names we can actually use with go commands
+UNTESTED=$(sed "s|${GOPATH}/src/||g" <<< "${UNTESTED}")
 TESTABLE=$(sed "s|${GOPATH}/src/||g" <<< "${TESTABLE}")
 
 FAILED=""
@@ -70,4 +74,12 @@ if [ ${FAILED_CNT} -gt 0 ]; then
   echo -e "\n" >&2
   echo "${FAILED_CNT} packages failed: ${FAILED}" >&2
   exit 1
+fi
+
+for pkg in ${TESTABLE}; do
+  UNTESTED=$(grep -v ${pkg} <<< "${UNTESTED}")
+done
+UNTESTED_CNT=$(wc -l <<< "${UNTESTED}")
+if [ ${UNTESTED_CNT} -gt 0 ]; then
+  echo -e "\n${UNTESTED_CNT} package left untested: ${UNTESTED}"
 fi
