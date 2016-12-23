@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -50,17 +51,6 @@ func convertErrors(errs []error) []string {
 	return result
 }
 
-func init() {
-	addNewGame("game", []string{
-		"Player 1",
-		"Player 2",
-		"Player 3",
-		"Player 4",
-		"Player 5",
-		"Player 6",
-	})
-}
-
 func getboardInfo(writer http.ResponseWriter, request *http.Request) {
 	resp := jsonResponse{}
 	defer writeJson(&resp, writer)
@@ -78,6 +68,17 @@ func getTrainCosts(writer http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
+	rand.Seed(int64(time.Now().Nanosecond()))
+
+	addNewGame("game", []string{
+		"Player 1",
+		"Player 2",
+		"Player 3",
+		"Player 4",
+		"Player 5",
+		"Player 6",
+	})
+
 	router := mux.NewRouter()
 	initializeGameRoutes(router)
 

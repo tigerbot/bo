@@ -2,6 +2,7 @@
 	'use strict';
 	require('knockout-mapping');
 
+	var alert     = require('./user-alert');
 	var state     = require('./game-state');
 	var hex_map   = require('./hex-map');
 	var players   = require('./players');
@@ -16,9 +17,9 @@
 		}
 
 		if (market_regexp.test(state.phase)) {
-			console.log("Market phase on "+state.turn+"'s turn");
+			alert("Market phase on "+state.turn+"'s turn");
 		} else if (business_regexp.test(state.phase)) {
-			console.log("Business phase for company "+state.turn);
+			alert("Business phase for company "+state.turn);
 		}
 	}
 

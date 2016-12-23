@@ -7,6 +7,10 @@ body {
 	overflow: hidden;
 }
 
+.hidden {
+	display: none;
+}
+
 .shadow-gradient {
 	background: -webkit-linear-gradient(top,
 		rgba(0, 0, 0, 0.0)   0%,
@@ -64,6 +68,36 @@ body {
 
 .money-value::before {
 	content: '$';
+}
+
+#alert-mask {
+	z-index: 100;
+	position: absolute;
+	top:    0px;
+	bottom: 0px;
+	left:   0px;
+	right:  0px;
+	background: rgba(0, 0, 0, 0.4);
+
+	.main-box {
+		width: 400px;
+		min-height: 200px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+
+		background: rgb(254, 240, 211);
+		padding: 15px;
+
+		button{
+			position: absolute;
+			right: 30px;
+			bottom: 20px;
+			padding: 5px 15px;
+
+		}
+	}
 }
 
 #company-list {

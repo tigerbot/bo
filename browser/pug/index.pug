@@ -5,6 +5,13 @@ html(lang="en")
 		script(src='/index.js', type='text/javascript')
 		link(href='/style.css', type='text/css', rel='stylesheet', media='screen')
 	body
+		div#alert-mask(data-bind='css: { hidden: !active() }')
+			div.main-box
+				h3(data-bind='text: description')
+				ul(data-bind='foreach: { data: messages, as: "msg" }')
+					li(data-bind='text: msg')
+				button(data-bind='click: accept') OK
+
 		div#company-list(data-bind='foreach: { data: companies }')
 			div.overview(data-bind='style: {backgroundColor: color}, click: select')
 				// ko if: restricted
