@@ -29,12 +29,22 @@ body {
 }
 
 .overview {
+	position: relative;
 	text-shadow: 0 0 8px white;
 	padding: 5px 0px;
 	border: 2px solid black;
 	.shadow-gradient;
 
-	> div:not(.title) {
+	.mask {
+		position: absolute;
+		// The top margin needs to be the negative of the parent's padding.
+		margin-top: -5px;
+		width:  100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.55);
+	}
+
+	> div:not(.title):not(.mask) {
 		margin-left: 20px;
 	}
 }

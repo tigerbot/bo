@@ -53,6 +53,12 @@ func (g *Game) beginMarketPhase() {
 		g.TurnManager.Order = append(g.TurnManager.Order, name)
 	}
 	sort.Sort(playerSorter{list: g.TurnManager.Order, info: g.Players})
+
+	if g.TechLevel >= 3 {
+		for _, company := range g.Companies {
+			company.Restricted = false
+		}
+	}
 }
 
 func (g *Game) beginBusinessPhase() {

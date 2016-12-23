@@ -57,6 +57,7 @@ func startCompany(t *testing.T, game *Game, company string, count, price int) []
 func startCompanyNewGame(t *testing.T, company string, count, price, cash, techLvl int) []error {
 	game := NewGame([]string{"1st", "2nd", "3rd"})
 	game.TechLevel = techLvl
+	game.beginMarketPhase()
 	game.Players[game.TurnManager.Current()].Cash = cash
 
 	return startCompany(t, game, company, count, price)

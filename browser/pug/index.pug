@@ -7,6 +7,9 @@ html(lang="en")
 	body
 		div#company-list(data-bind='foreach: { data: companies }')
 			div.overview(data-bind='style: {backgroundColor: color}, click: select')
+				// ko if: restricted
+				div.mask
+				// /ko
 				div.title
 					img(data-bind='attr: { src: icon }')
 					h3(data-bind='text: name')
@@ -44,6 +47,7 @@ html(lang="en")
 							td(data-bind='text: capacity')
 						// /ko
 				// /ko
+
 		//- We put the hex map under a div because the library we are using messes with the element
 		//- in a way that makes it difficult to add listeners for resizing and zooming events.
 		div#hex-map-parent

@@ -88,7 +88,7 @@ func (g *Game) validateStockBuy(player *Player, buyInfo *MarketAction, saleCash 
 	// If the company hasn't been started yet we need to make sure the company is allowed to be
 	// started, and that the price the player wants to start it at is valid for this tech level.
 	if company.StockPrice == 0 {
-		if company.Restricted && g.TechLevel < 3 {
+		if company.Restricted {
 			return fmt.Errorf("%s locked until tech level 3", company.Name)
 		}
 
