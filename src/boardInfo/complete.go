@@ -13,6 +13,7 @@ import (
 type hex struct {
 	BuildCost int   `json:"build_cost"`
 	City      *City `json:"city"`
+	Coal      bool  `json:"coal"`
 }
 
 var completeMap map[string]hex
@@ -30,10 +31,20 @@ func init() {
 			City:      curCity,
 		}
 	}
+
+	for _, coord := range StartingCoal() {
+		curHex := completeMap[coord]
+		curHex.Coal = true
+		completeMap[coord] = curHex
+	}
 }
 
 func JsonMap() ([]byte, error) {
 	return json.Marshal(completeMap)
+}
+
+func StartingCoal() []string {
+	return []string{"G18", "H17", "I16", "J15", "K14"}
 }
 
 func absInt(num int) int {

@@ -5,9 +5,10 @@
 	var common   = require('./common');
 
 	var canvas;
+	var hex_bg = new fabric.Pattern({ source: fabric.util.createImage, repeat: 'repeat' });
 	var x_sep, y_sep;
 	var hex_elems = {};
-	var hex_bg = new fabric.Pattern({ source: fabric.util.createImage, repeat: 'repeat' });
+	var coal_holders = {};
 
 	fabric.util.loadImage('/hex_background.png', function (img) {
 		hex_bg.source = img;
@@ -56,8 +57,8 @@
 			city_name.scaleToWidth(rev_bar.getWidth());
 		}
 		if (city_info.exception) {
-			if (city_info.exception.toLowerCase() === "universal") {
-				city_name.set({ fill: "blue" });
+			if (city_info.exception.toLowerCase() === 'universal') {
+				city_name.set({ fill: 'blue' });
 			} else {
 				city_name.set({
 					fill:   common.get_company_color(city_info.exception),
@@ -117,14 +118,10 @@
 			left:    radius,
 		};
 		var coal_opts = {
-			fontSize:  radius/4,
-			textAlign: 'center',
 			originX:   'center',
 			originY:   'top',
 			top:       radius,
 			left:      radius,
-			fill:      'white',
-			backgroundColor: 'black',
 		};
 		var rails_opts = {
 			originX: 'center',
@@ -139,14 +136,14 @@
 		return new fabric.Group(Object.keys(board_info).map(function (id) {
 			var details = board_info[id];
 			var items = [];
-			var coal = null;
 			var rails;
 
 			items.push(new fabric.Polygon(pnts, hex_opts));
 			items.push(new fabric.Text('$'+details.build_cost, cost_opts));
 			if (details.coal) {
-				coal = new fabric.Text('COAL', coal_opts);
-				items.push(coal);
+				var holder = new fabric.Group([], coal_opts);
+				items.push(holder);
+				coal_holders[id] = holder;
 			}
 			if (details.city) {
 				items.push(create_city(details.city).scaleToWidth(1.85*x_sep).set(city_opts));
@@ -161,7 +158,6 @@
 
 			hex_elems[id] = {
 				group:    group,
-				coal:     coal,
 				rails:    rails,
 				selected: false,
 			};
@@ -205,22 +201,48 @@
 	}
 
 	function has_coal(id) {
-		if (!hex_elems.hasOwnProperty(id)) {
+		if (!coal_holders.hasOwnProperty(id)) {
 			return false;
 		}
-		return hex_elems[id].coal !== null;
+		return coal_holders[id].size() > 0;
 	}
 	function mine_coal(id) {
-		if (!hex_elems.hasOwnProperty(id)) {
+		if (!coal_holders.hasOwnProperty(id)) {
 			return false;
-		} else if (hex_elems[id].coal === null) {
+		} else if (coal_holders[id].coal.size() === 0) {
 			return false;
 		}
 
-		hex_elems[id].group.remove(hex_elems[id].coal);
-		hex_elems[id].coal = null;
-		canvas.renderAll();
+		coal_holders[id].remove(coal_holders[id].item(0));
+		if (canvas) {
+			canvas.renderAll();
+		}
 		return true;
+	}
+	function set_coal(locations) {
+		var coal_opts = {
+			fontSize:   12.5,
+			top:        0,
+			left:       0,
+			textAlign:  'center',
+			originX:    'center',
+			originY:    'center',
+			fill:       'white',
+			backgroundColor: 'black',
+		};
+		Object.keys(coal_holders).forEach(function (id) {
+			var present = coal_holders[id].size() > 0;
+			var wanted  = locations.indexOf(id) >= 0;
+			if (present && !wanted) {
+				coal_holders[id].remove(coal_holders[id].item(0));
+			}
+			if (wanted && !present) {
+				coal_holders[id].add(new fabric.Text('COAL', coal_opts));
+			}
+		});
+		if (canvas) {
+			canvas.renderAll();
+		}
 	}
 
 	function build_rail(id, color) {
@@ -389,6 +411,7 @@
 	module.exports.deselect_hex = deselect_hex;
 
 	module.exports.has_coal   = has_coal;
+	module.exports.set_coal   = set_coal;
 	module.exports.mine_coal  = mine_coal;
 	module.exports.build_rail = build_rail;
 })();

@@ -1,5 +1,9 @@
 package gameState
 
+import (
+	"boardInfo"
+)
+
 var companyInitCond = map[string]struct {
 	tech3  bool
 	sort   string
@@ -22,7 +26,7 @@ func NewGame(playerNames []string) *Game {
 	result := new(Game)
 
 	result.GlobalState.TechLevel = 1
-	result.GlobalState.UnminedCoal = []string{"G18", "H17", "I16", "J15", "K14"}
+	result.GlobalState.UnminedCoal = boardInfo.StartingCoal()
 	result.GlobalState.OrphanStocks = make(map[string]int, len(companyInitCond))
 
 	result.Companies = make(map[string]*Company, len(companyInitCond))
