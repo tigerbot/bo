@@ -58,6 +58,9 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 			}
 		}
 	}
+	for _, hexCoord := range update.Track {
+		company.Treasury -= boardInfo.BuildCost(hexCoord)
+	}
 	company.BuiltTrack = append(company.BuiltTrack, update.Track...)
 	company.UnbuiltTrack -= len(update.Track)
 	sort.Strings(company.BuiltTrack)
