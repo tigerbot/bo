@@ -325,11 +325,11 @@
 		});
 		canvas.on('mouse:up', function (event) {
 			pressed = false;
-			if (event.target !== map || Date.now() - time > 250) {
+			if (Date.now() - time > 250) {
 				return;
 			}
-			var row = Math.floor(((event.e.layerY - event.target.getTop() ) / event.target.scaleY) / y_sep);
-			var col = Math.floor(((event.e.layerX - event.target.getLeft()) / event.target.scaleX) / x_sep);
+			var row = Math.floor(((event.e.layerY - map.getTop() ) / map.scaleY) / y_sep);
+			var col = Math.floor(((event.e.layerX - map.getLeft()) / map.scaleX) / x_sep);
 
 			if (row % 2 === 0) {
 				col = 2*Math.floor(col/2);
@@ -385,8 +385,8 @@
 		})();
 		window.onresize = resize_canvas;
 
-		// Set the scale really small so that after the canvas is sized to be exactly the same as the
-		// parent element it will be expanded to fit the entire area by verify_map_pos.
+		// Set the scale really small so that after the canvas is sized to be exactly the same as
+		// the parent element it will be expanded to fit the entire area by verify_map_pos.
 		map.scale(0.01);
 		resize_canvas();
 	}
