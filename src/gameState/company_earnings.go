@@ -166,6 +166,7 @@ func (g *Game) handleNonprofitable(company *Company) {
 	}
 
 	delete(g.OrphanStocks, company.Name)
+	company.President = ""
 	company.HeldStock = 10
 	company.Treasury = 0
 	for ind := range company.Equipment {
