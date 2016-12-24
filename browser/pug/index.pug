@@ -87,35 +87,30 @@ html(lang="en")
 				div
 					// ko if: market_phase
 					div.market(data-bind='with: market')
-						div
-							span
-								input(type='radio', name='action', value='pass', data-bind='checked: action')
-								| Pass
-							span
-								input(type='radio', name='action', value='player', data-bind='checked: action')
-								| Buy/Sell
-						div(data-bind='if: action() !== "pass"')
-							div Purchase:
-								br
-								span Count:
-									input(data-bind='value: buy_cnt', maxlength='2')
-								span Price:
-									input(data-bind='value: buy_price', maxlength='2')
-						div.stocks(data-bind='if: action() !== "pass" && sales().length > 0')
-							div Sell:
+						div.stocks
+							h4 Sell Stock:
 							table
 								tbody(data-bind='foreach: {data: sales}')
 									tr(data-bind='style: {backgroundColor: color}')
 										th(data-bind='text: company')
 										td
 											input(data-bind='value: count', maxlength='2')
+						div
+							h4 Buy Stock:
+							div
+								div Count:
+									input(data-bind='value: buy_cnt', maxlength='2')
+								div Price:
+									input(data-bind='value: buy_price', maxlength='2')
 					// /ko
 
 					// ko ifnot: market_phase
+					div Use the map to select hexes for placing rail, mining coal, and servicing cities.
+						| &nbsp;Selecting no cities to service will maximize earnings.
 					// ko if: business_part1
-					div(data-bind='with: inventory')
+					div.inventory(data-bind='with: inventory')
 						div
-							div Scrap:
+							h4 Scrap Equipment:
 							table
 								tbody(data-bind='foreach: {data: scrap}')
 									tr
@@ -123,18 +118,19 @@ html(lang="en")
 										td
 											input(data-bind='value: count', maxlength='2')
 						div
-							div Buy:
-								br
+							h4 Buy Equipment:
+							div
 								span Count:
 									input(data-bind='value: buy', maxlength='2')
 						div
-							span
-								input(type='radio', name='action', value='build', data-bind='checked: action')
-								| Build Track
-							span
-								input(type='radio', name='action', value='mine', data-bind='checked: action')
-								| Mine Coal
-							div Use map to select hexes.
+							h4 Build:
+							div
+								div
+									input(type='radio', name='action', value='build', data-bind='checked: action')
+									| Build Track
+								div
+									input(type='radio', name='action', value='mine', data-bind='checked: action')
+									| Mine Coal
 
 					// /ko
 
@@ -145,8 +141,7 @@ html(lang="en")
 							| Pay Dividends
 					// /ko
 					// /ko
-				div
-					button(data-bind='click: confirm') Confirm
+				button(data-bind='click: confirm') Confirm
 
 
 		div#game-state

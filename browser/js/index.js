@@ -17,7 +17,6 @@
 		business_part1: state.business_part1,
 
 		market: {
-			action:    ko.observable("player"),
 			sales:     ko.observableArray([]),
 			buy_cnt:   ko.observable(0),
 			buy_price: ko.observable(0),
@@ -57,7 +56,6 @@
 				return;
 			}
 			input_ctrl.description(turn + "'s Turn");
-			market.action("player");
 			market.buy_cnt(0);
 			market.buy_price(0);
 			market.sales(held_shares.map(function (info) {
@@ -88,11 +86,6 @@
 	state.refresh();
 
 	function take_market_turn(market) {
-		if (market.action() === "pass") {
-			market.sales([]);
-			market.buy_cnt(0);
-		}
-
 		var data = {};
 		data.sales = market.sales().filter(function (sale) {
 			return sale.count() > 0;
