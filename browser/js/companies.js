@@ -73,32 +73,42 @@
 		return result;
 	}
 
-	common.request('/game/companies', function (err, result) {
-		if (err) {
-			console.error('failed to get initial company info', err);
-			return;
-		}
-
-		Object.keys(result).forEach(function (name) {
-			var view_model = ko.mapping.fromJS(result[name]);
-
-			view_model.name = name;
-			view_model.icon = common.get_company_logo(name);
-			view_model.color = common.get_company_color(name);
-			view_model.selected = ko.observable(false);
-			view_model.select = select_company.bind(null, name);
-			view_model.equipment_list = ko.computed(convert_equipment, view_model);
-
-			company_list.push(view_model);
-		});
-
-		sort_companies();
-		company_list()[0].selected(true);
-	});
 	domready(function () {
 		ko.applyBindings({companies: company_list}, document.getElementById("company-list"));
 	});
 
+	function refresh(first_time) {
+		common.request('/game/companies', function (err, result) {
+			if (err) {
+				console.error('failed to get initial company info', err);
+				return;
+			}
+
+			company_list().forEach(function (company) {
+				ko.mapping.fromJS(result[company.name], company);
+				delete result[company.name];
+			});
+			Object.keys(result).forEach(function (name) {
+				var view_model = ko.mapping.fromJS(result[name]);
+
+				view_model.name = name;
+				view_model.icon = common.get_company_logo(name);
+				view_model.color = common.get_company_color(name);
+				view_model.selected = ko.observable(false);
+				view_model.select = select_company.bind(null, name);
+				view_model.equipment_list = ko.computed(convert_equipment, view_model);
+
+				company_list.push(view_model);
+			});
+			sort_companies();
+			if (first_time) {
+				company_list()[0].selected(true);
+			}
+		});
+	}
+	refresh(true);
+
+	module.exports.refresh   = refresh;
 	module.exports.selected  = get_selected;
 	module.exports.president = get_president;
 })();

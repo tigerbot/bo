@@ -93,6 +93,8 @@
 				alert('Market Turn Failed', errs);
 			}
 			state.refresh();
+			players.refresh();
+			companies.refresh();
 		});
 	}
 

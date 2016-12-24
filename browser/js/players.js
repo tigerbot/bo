@@ -54,36 +54,53 @@
 		});
 	}
 
-	common.request('/game/players', function (err, result) {
-		if (err) {
-			console.error('failed to get initial player info', err);
-			return;
-		}
-
-		Object.keys(result).forEach(function (name) {
-			var view_model = ko.mapping.fromJS(result[name]);
-
-			view_model.name = name;
-			view_model.stock_list = ko.observableArray(Object.keys(view_model.stocks).map(function (name) {
-				return {
-					name:      name,
-					color:     common.get_company_color(name),
-					count:     view_model.stocks[name],
-				};
-			}));
-			view_model.selected = ko.observable(false);
-			view_model.select = select_player.bind(null, name);
-
-			player_list.push(view_model);
-		});
-
-		sort_players();
-		player_list()[0].selected(true);
-	});
 	domready(function () {
 		ko.applyBindings({players: player_list}, document.getElementById("player-list"));
 	});
+	function refresh(select_first) {
+		common.request('/game/players', function (err, result) {
+			if (err) {
+				console.error('failed to get initial player info', err);
+				return;
+			}
 
+			player_list().forEach(function (player) {
+				ko.mapping.fromJS(result[player.name], player);
+				player.stock_list(Object.keys(player.stocks).map(function (name) {
+					return {
+						name:      name,
+						color:     common.get_company_color(name),
+						count:     player.stocks[name],
+					};
+				}));
+				delete result[player.name];
+			});
+			Object.keys(result).forEach(function (name) {
+				var view_model = ko.mapping.fromJS(result[name]);
+
+				view_model.name = name;
+				view_model.stock_list = ko.observableArray(Object.keys(view_model.stocks).map(function (name) {
+					return {
+						name:      name,
+						color:     common.get_company_color(name),
+						count:     view_model.stocks[name],
+					};
+				}));
+				view_model.selected = ko.observable(false);
+				view_model.select = select_player.bind(null, name);
+
+				player_list.push(view_model);
+			});
+
+			sort_players();
+			if (select_first) {
+				player_list()[0].selected(true);
+			}
+		});
+	}
+	refresh(true);
+
+	module.exports.refresh     = refresh;
 	module.exports.selected    = get_selected;
 	module.exports.held_shares = get_stocks;
 })();
