@@ -2,7 +2,9 @@
 	'use strict';
 	var ko       = require('knockout');
 	var domready = require('domready');
-	var common   = require('./common');
+
+	var common  = require('./common');
+	var hex_map = require('./hex-map');
 
 	var company_list = ko.observableArray([]);
 
@@ -85,6 +87,12 @@
 			}
 
 			company_list().forEach(function (company) {
+				var already_built = company.built_track();
+				result[company.name].built_track.forEach(function (id) {
+					if (already_built.indexOf(id) < 0) {
+						hex_map.build_rail(id, company.color);
+					}
+				});
 				ko.mapping.fromJS(result[company.name], company);
 				delete result[company.name];
 			});
@@ -97,6 +105,9 @@
 				view_model.selected = ko.observable(false);
 				view_model.select = select_company.bind(null, name);
 				view_model.equipment_list = ko.computed(convert_equipment, view_model);
+				view_model.built_track().forEach(function (id) {
+					hex_map.build_rail(id, view_model.color);
+				});
 
 				company_list.push(view_model);
 			});

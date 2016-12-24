@@ -187,7 +187,7 @@
 	function deselect_hex(id) {
 		var keys;
 		if (id === '*') {
-			keys = selected();
+			keys = hex_selected();
 		} else if (hex_elems.hasOwnProperty(id)) {
 			keys = [ id ];
 		} else {
@@ -197,7 +197,10 @@
 			hex_elems[id].selected = false;
 			hex_elems[id].group.item(0).set({stroke: 'black', opacity: 1});
 		});
-		canvas.renderAll();
+
+		if (canvas) {
+			canvas.renderAll();
+		}
 	}
 
 	function has_coal(id) {
@@ -273,7 +276,9 @@
 			}
 			total_cnt -= row_cnt;
 		}
-		canvas.renderAll();
+		if (canvas) {
+			canvas.renderAll();
+		}
 	}
 
 	function add_listeners() {
@@ -386,27 +391,25 @@
 		resize_canvas();
 	}
 
-	(function () {
-		common.request('/board_info', function (err, board_info) {
-			if (err) {
-				console.error('failed to get map state', err);
-				return;
-			}
-			var map = create_map(board_info);
+	common.request('/board_info', function (err, board_info) {
+		if (err) {
+			console.error('failed to get map state', err);
+			return;
+		}
+		var map = create_map(board_info);
 
-			domready(function () {
-				canvas = new fabric.Canvas('hex-map', {
-					selection: false,
-					height: 650,
-					width: 1050,
-				});
-				canvas.add(map);
-				add_listeners();
+		domready(function () {
+			canvas = new fabric.Canvas('hex-map', {
+				selection: false,
+				height: 650,
+				width: 1050,
 			});
+			canvas.add(map);
+			add_listeners();
 		});
-	})();
+	});
 
-	module.exports.hex_selected = hex_selected;
+	module.exports.selected     = hex_selected;
 	module.exports.select_hex   = select_hex;
 	module.exports.deselect_hex = deselect_hex;
 
