@@ -258,10 +258,11 @@ body {
 	left:   @company-width;
 	right:  @player-width;
 	height: @state-height;
+	overflow: auto;
 
 	>div {
 		margin: auto;
-		height: 100%;
+		height: @state-height - 14; // adjust for our padding and border
 		max-width: 500px;
 		padding: 5px 25px;
 		border: 2px solid black;

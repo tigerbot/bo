@@ -48,7 +48,7 @@ func (r gameRouter) takeMarketTurn(writer http.ResponseWriter, request *http.Req
 	}
 }
 
-func (r gameRouter) takeBussinessTurnOne(writer http.ResponseWriter, request *http.Request) {
+func (r gameRouter) takeBusinessTurnOne(writer http.ResponseWriter, request *http.Request) {
 	resp := jsonResponse{}
 	defer writeJson(&resp, writer)
 
@@ -68,7 +68,7 @@ func (r gameRouter) takeBussinessTurnOne(writer http.ResponseWriter, request *ht
 	}
 }
 
-func (r gameRouter) takeBussinessTurnTwo(writer http.ResponseWriter, request *http.Request) {
+func (r gameRouter) takeBusinessTurnTwo(writer http.ResponseWriter, request *http.Request) {
 	resp := jsonResponse{}
 	defer writeJson(&resp, writer)
 
@@ -108,8 +108,8 @@ func addNewGame(gameId string, playerNames []string) error {
 	router.HandleFunc("/companies", result.getCompanies)
 
 	router.HandleFunc("/market_turn", result.takeMarketTurn)
-	router.HandleFunc("/business_turn_one", result.takeBussinessTurnOne)
-	router.HandleFunc("/business_turn_two", result.takeBussinessTurnTwo)
+	router.HandleFunc("/business_turn_one", result.takeBusinessTurnOne)
+	router.HandleFunc("/business_turn_two", result.takeBusinessTurnTwo)
 	return nil
 }
 

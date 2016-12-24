@@ -27,7 +27,7 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 			fmt.Errorf("It's %s's turn and %s is the president", company.Name, company.President),
 		}
 	}
-	if company.TurnStage != "inventory" {
+	if g.Stage != "inventory" {
 		return []error{fmt.Errorf("%s has already updated its inventory", company.Name)}
 	}
 
@@ -62,7 +62,7 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 	company.UnbuiltTrack -= len(update.Track)
 	sort.Strings(company.BuiltTrack)
 
-	company.TurnStage = "earnings"
+	g.Stage = "earnings"
 	return nil
 }
 

@@ -14,21 +14,30 @@
 	var input_ctrl = {
 		description:    ko.observable("Initializing"),
 		market_phase:   state.market_phase,
+		business_part1: state.business_part1,
 
 		market: {
-			type:      ko.observable("pass"),
+			action:    ko.observable("player"),
 			sales:     ko.observableArray([]),
 			buy_cnt:   ko.observable(0),
 			buy_price: ko.observable(0),
+		},
+		inventory: {
+			scrap:  ko.observableArray([]),
+			buy:    ko.observable(0),
+			action: ko.observable("build"),
+		},
+		earnings: {
+			dividends: ko.observable(false),
 		},
 	};
 	input_ctrl.confirm = function () {
 		if (this.market_phase()) {
 			take_market_turn(this.market);
 		} else if (this.business_part1()) {
-			console.log("inventory control not implemented");
+			take_inventory_turn(this.inventory);
 		} else {
-			console.log("income control not implemented");
+			take_earnings_turn(this.earnings);
 		}
 	};
 
@@ -48,20 +57,37 @@
 				return;
 			}
 			input_ctrl.description(turn + "'s Turn");
-			market.type("player");
+			market.action("player");
 			market.buy_cnt(0);
 			market.sales(held_shares.map(function (info) {
 				info.count = ko.observable(0);
 				return info;
 			}));
+		} else {
+			hex_map.deselect_hex('*');
+			input_ctrl.description(turn +"'s ("+companies.president(turn)+") Turn");
+			if (input_ctrl.business_part1()) {
+				var inventory = input_ctrl.inventory;
+				inventory.scrap([0,0,0,0,0,0].map(function (count, ind) {
+					return {
+						level: 'Tech ' + (ind+1),
+						count: ko.observable(count),
+					};
+				}));
+				inventory.buy(0);
+				inventory.action("build");
+			} else {
+				input_ctrl.earnings.dividends(false);
+			}
 		}
 	}
 	state.market_phase.subscribe(update_options);
+	state.business_part1.subscribe(update_options);
 	state.turn.subscribe(update_options);
 	state.refresh();
 
 	function take_market_turn(market) {
-		if (market.type() === "pass") {
+		if (market.action() === "pass") {
 			market.sales([]);
 			market.buy_cnt(0);
 		}
@@ -91,6 +117,64 @@
 		common.request(req_obj, function (errs) {
 			if (errs) {
 				alert('Market Turn Failed', errs);
+			}
+			state.refresh();
+			players.refresh();
+			companies.refresh();
+		});
+	}
+
+	function take_inventory_turn(inventory) {
+		var data = {};
+		var selected = hex_map.selected();
+
+		if (inventory.action() === "mine") {
+			if (selected.length !== 1) {
+				alert("Invalid input", ["Exactly one hex can be mined per turn"]);
+				return;
+			}
+			data.mine_coal = selected[0];
+		} else {
+			data.build_track = selected;
+		}
+		data.scrap_equipment = inventory.scrap().map(function (info) {
+			return parseInt(info.count(), 10);
+		});
+		data.buy_equipment = parseInt(inventory.buy(), 10);
+		data.player_name = companies.president(state.turn());
+
+		var req_obj = {};
+		req_obj.url = '/game/business_turn_one';
+		req_obj.method = 'POST';
+		req_obj.data = data;
+		common.request(req_obj, function (errs) {
+			if (errs) {
+				alert('Inventory Update Failed', errs);
+			} else {
+				hex_map.deselect_hex('*');
+			}
+			state.refresh();
+			players.refresh();
+			companies.refresh();
+		});
+	}
+
+	function take_earnings_turn(earnings) {
+		var data = {
+			serviced_cities: hex_map.selected(),
+			pay_dividends:   earnings.dividends(),
+		};
+		data.player_name = companies.president(state.turn());
+
+		var req_obj = {};
+		req_obj.url = '/game/business_turn_two';
+		req_obj.method = 'POST';
+		req_obj.data = data;
+		common.request(req_obj, function (errs) {
+			if (errs) {
+				alert('Earnings Stage Failed', errs);
+			} else {
+				hex_map.deselect_hex('*');
 			}
 			state.refresh();
 			players.refresh();

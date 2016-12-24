@@ -59,6 +59,7 @@ func (g *Game) beginMarketPhase() {
 			company.Restricted = false
 		}
 	}
+	g.Stage = ""
 }
 
 func (g *Game) beginBusinessPhase() {
@@ -70,10 +71,9 @@ func (g *Game) beginBusinessPhase() {
 		if company.President != "" {
 			g.TurnManager.Order = append(g.TurnManager.Order, name)
 		}
-		company.TurnStage = ""
 	}
 	sort.Sort(companySorter{list: g.TurnManager.Order, info: g.Companies})
-	g.Companies[g.TurnManager.Order[0]].TurnStage = "inventory"
+	g.Stage = "inventory"
 }
 
 func (g *Game) endMarketTurn(pass bool) {
@@ -95,15 +95,13 @@ func (g *Game) endMarketTurn(pass bool) {
 }
 
 func (g *Game) endBusinessTurn() {
-	g.Companies[g.TurnManager.Current()].TurnStage = ""
+	g.Stage = "inventory"
 	if g.TurnManager.Number += 1; g.TurnManager.Number == len(g.TurnManager.Order) {
 		if g.Phase == 1 {
 			g.beginBusinessPhase()
 		} else {
 			g.beginMarketPhase()
 		}
-	} else {
-		g.Companies[g.TurnManager.Current()].TurnStage = "inventory"
 	}
 }
 

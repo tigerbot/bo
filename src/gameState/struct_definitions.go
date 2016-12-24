@@ -13,6 +13,7 @@ type GlobalState struct {
 	Round       int         `json:"round"`
 	Phase       phaseNum    `json:"phase"`
 	TurnManager TurnManager `json:"turn"`
+	Stage       string      `json:"stage,omitempty"`
 
 	TrainsBought int            `json:"trains_bought"`
 	TechLevel    int            `json:"tech_level"`
@@ -25,7 +26,6 @@ type Company struct {
 	Name       string `json:"-"`
 	Restricted bool   `json:"restricted"`
 	President  string `json:"president"`
-	TurnStage  string `json:"turn_stage,omitempty"`
 
 	StockPrice  int    `json:"stock_price"`
 	PriceChange string `json:"price_changed"`

@@ -16,7 +16,7 @@ func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings
 		return []error{
 			fmt.Errorf("It's %s's turn and %s is the president", company.Name, company.President)}
 	}
-	if company.TurnStage != "earnings" {
+	if g.Stage != "earnings" {
 		return []error{fmt.Errorf("%s is not ready to handle its earnings", company.Name)}
 	}
 

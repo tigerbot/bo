@@ -11,6 +11,7 @@
 		round: ko.observable(0),
 		phase: ko.observable(""),
 		turn:  ko.observable(""),
+		stage: ko.observable(""),
 
 		tech_level:    ko.observable(1),
 		trains_bought: ko.observable(0),
@@ -75,6 +76,7 @@
 			game_state.round(repsonse.round);
 			game_state.phase(repsonse.phase);
 			game_state.turn(repsonse.turn);
+			game_state.stage(repsonse.stage);
 
 			game_state.tech_level(repsonse.tech_level);
 			game_state.trains_bought(repsonse.trains_bought);
@@ -99,5 +101,8 @@
 	}, game_state);
 	module.exports.market_phase = ko.computed(function () {
 		return market_regexp.test(this.phase());
+	}, game_state);
+	module.exports.business_part1 = ko.computed(function () {
+		return this.stage() === "inventory";
 	}, game_state);
 })();
