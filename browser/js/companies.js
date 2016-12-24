@@ -120,6 +120,7 @@
 	refresh(true);
 
 	module.exports.refresh   = refresh;
+	module.exports.select    = select_company;
 	module.exports.selected  = get_selected;
 	module.exports.president = get_president;
 })();

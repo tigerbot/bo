@@ -55,6 +55,7 @@
 				setTimeout(update_options, 1000);
 				return;
 			}
+			players.select(turn);
 			input_ctrl.description(turn + "'s Turn");
 			market.buy_cnt(0);
 			market.buy_price(0);
@@ -65,6 +66,7 @@
 		} else {
 			hex_map.deselect_hex('*');
 			input_ctrl.description(turn +"'s ("+companies.president(turn)+") Turn");
+			companies.select(turn);
 			if (input_ctrl.business_part1()) {
 				var inventory = input_ctrl.inventory;
 				inventory.scrap([0,0,0,0,0,0].map(function (count, ind) {

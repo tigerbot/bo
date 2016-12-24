@@ -101,6 +101,7 @@
 	refresh(true);
 
 	module.exports.refresh     = refresh;
+	module.exports.select      = select_player;
 	module.exports.selected    = get_selected;
 	module.exports.held_shares = get_stocks;
 })();
