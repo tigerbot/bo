@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -68,16 +70,15 @@ func getTrainCosts(writer http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
-	rand.Seed(int64(time.Now().Nanosecond()))
+	port := flag.Int("port", 8000, "the port the web server will listen on")
+	flag.Parse()
 
-	addNewGame("game", []string{
-		"Player 1",
-		"Player 2",
-		"Player 3",
-		"Player 4",
-		"Player 5",
-		"Player 6",
-	})
+	rand.Seed(int64(time.Now().Nanosecond()))
+	if flag.NArg() > 0 {
+		addNewGame("game", flag.Args())
+	} else {
+		addNewGame("game", []string{"1st", "2nd", "3rd", "4th"})
+	}
 
 	router := mux.NewRouter()
 	initializeGameRoutes(router)
@@ -89,7 +90,7 @@ func main() {
 
 	svr := http.Server{
 		Handler: router,
-		Addr:    ":8000",
+		Addr:    fmt.Sprintf(":%d", *port),
 
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
