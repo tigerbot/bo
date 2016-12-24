@@ -58,7 +58,22 @@ func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings
 	}
 
 	net := gross - costs
-	defer func() { company.NetIncome = net }()
+	defer func(prevPrice int) {
+		company.NetIncome = net
+
+		// If the stock price for this company has changed then update the net worth for
+		// any players that have stock in this company.
+		if company.StockPrice != prevPrice {
+			for _, player := range g.Players {
+				if player.Stocks[company.Name] > 0 {
+					player.NetWorth = player.Cash
+					for name, count := range player.Stocks {
+						player.NetWorth += count * g.Companies[name].StockPrice
+					}
+				}
+			}
+		}
+	}(company.StockPrice)
 
 	if net <= 0 {
 		// A lot happens for unprofitable companies, so it was put into a different function
@@ -78,7 +93,9 @@ func (g *Game) HandleCompanyEarnings(playerName string, earnings CompanyEarnings
 		perShare := net / 10
 		company.Treasury += perShare * company.HeldStock
 		for _, player := range g.Players {
-			player.Cash += perShare * player.Stocks[company.Name]
+			total := perShare * player.Stocks[company.Name]
+			player.Cash += total
+			player.NetWorth += total
 		}
 	}
 

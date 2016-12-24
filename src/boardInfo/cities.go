@@ -227,7 +227,7 @@ func (s citySorter) Len() int {
 	return len(s.cityList)
 }
 func (s citySorter) Less(i, j int) bool {
-	return s.cityList[i].Revenue[s.techLvl] < s.cityList[j].Revenue[s.techLvl]
+	return s.cityList[i].Revenue[s.techLvl] > s.cityList[j].Revenue[s.techLvl]
 }
 func (s citySorter) Swap(i, j int) {
 	s.cityList[i], s.cityList[j] = s.cityList[j], s.cityList[i]

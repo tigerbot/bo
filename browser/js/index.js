@@ -59,6 +59,7 @@
 			input_ctrl.description(turn + "'s Turn");
 			market.action("player");
 			market.buy_cnt(0);
+			market.buy_price(0);
 			market.sales(held_shares.map(function (info) {
 				info.count = ko.observable(0);
 				return info;

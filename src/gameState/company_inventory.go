@@ -48,7 +48,7 @@ func (g *Game) UpdateCompanyInventory(playerName string, update CompanyInventory
 		g.TrainsBought += 1
 		g.TechLevel = boardInfo.TechLevel(g.TrainsBought)
 		company.Treasury -= boardInfo.TrainCost(g.TrainsBought)
-		company.Equipment[g.TechLevel] += 1
+		company.Equipment[g.TechLevel-1] += 1
 	}
 	if update.Coal != "" {
 		company.CoalMined += 1
