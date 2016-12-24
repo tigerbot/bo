@@ -65,12 +65,13 @@
 			}
 
 			player_list().forEach(function (player) {
-				ko.mapping.fromJS(result[player.name], player);
-				player.stock_list(Object.keys(player.stocks).map(function (name) {
+				var update = result[player.name];
+				ko.mapping.fromJS(update, player);
+				player.stock_list(Object.keys(update.stocks).map(function (name) {
 					return {
 						name:      name,
 						color:     common.get_company_color(name),
-						count:     player.stocks[name],
+						count:     update.stocks[name],
 					};
 				}));
 				delete result[player.name];

@@ -93,7 +93,7 @@
 			return sale.count() > 0;
 		}).map(function (sale) {
 			return {
-				company: sale.name,
+				company: sale.company,
 				count:   parseInt(sale.count(), 10),
 			};
 		});
