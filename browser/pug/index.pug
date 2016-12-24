@@ -81,6 +81,39 @@ html(lang="en")
 							// /ko
 				// /ko
 
+		div#user-input
+			div
+				h3(data-bind='text: description')
+				div
+					// ko if: market_phase
+					div.market(data-bind='with: market')
+						div
+							span
+								input(type='radio', name='action', value='pass', data-bind='checked: type')
+								| Pass
+							span
+								input(type='radio', name='action', value='player', data-bind='checked: type')
+								| Buy/Sell
+						div(data-bind='if: type() !== "pass"')
+							div Purchase:
+								br
+								span Count:
+									input(data-bind='value: buy_cnt', maxlength='2')
+								span Price:
+									input(data-bind='value: buy_price', maxlength='2')
+						div.stocks(data-bind='if: type() !== "pass" && sales().length > 0')
+							div Sell:
+							table
+								tbody(data-bind='foreach: {data: sales}')
+									tr(data-bind='style: {backgroundColor: color}')
+										th(data-bind='text: company')
+										td
+											input(data-bind='value: count', maxlength='2')
+					// /ko
+				div
+					button(data-bind='click: confirm') Confirm
+
+
 		div#game-state
 			div.split-row
 				span Phase:

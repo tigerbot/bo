@@ -48,6 +48,16 @@
 			throw new Error('json request would overwrite cb functions');
 		}
 		options.error = function (err) {
+			try {
+				var parsed = JSON.parse(err.responseText);
+				if (parsed.errors) {
+					err = parsed.errors;
+				} else {
+					err = err.statusText;
+				}
+			} catch(e) {
+				err = err.statusText;
+			}
 			callback(err, null);
 		};
 		options.success = function (resp) {

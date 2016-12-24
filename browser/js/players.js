@@ -11,6 +11,37 @@
 			view_model.selected(name === view_model.name);
 		});
 	}
+	function get_selected() {
+		var result = '';
+		player_list().some(function (player) {
+			if (player.selected()) {
+				result = player.name;
+				return true;
+			}
+		});
+		return result;
+	}
+
+	function get_stocks(name) {
+		var result = null;
+		player_list().some(function (player) {
+			if (player.name === name) {
+				result = player.stock_list();
+				return true;
+			}
+		});
+
+		if (result) {
+			result = result.map(function (info) {
+				return {
+					company: info.name,
+					color:   info.color,
+					count:   info.count,
+				};
+			});
+		}
+		return result;
+	}
 
 	function sort_players() {
 		player_list.sort(function (left, right) {
@@ -52,4 +83,7 @@
 	domready(function () {
 		ko.applyBindings({players: player_list}, document.getElementById("player-list"));
 	});
+
+	module.exports.selected    = get_selected;
+	module.exports.held_shares = get_stocks;
 })();

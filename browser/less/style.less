@@ -2,15 +2,6 @@
 @player-width: 290px;
 @state-height: 250px;
 
-body {
-	background-color: rgb(222, 239, 247);
-	overflow: hidden;
-}
-
-.hidden {
-	display: none;
-}
-
 .shadow-gradient {
 	background: -webkit-linear-gradient(top,
 		rgba(0, 0, 0, 0.0)   0%,
@@ -30,6 +21,22 @@ body {
 		rgba(0, 0, 0, 0.1)  80%,
 		rgba(0, 0, 0, 0.2) 100%
 	);
+}
+
+body {
+	.shadow-gradient;
+	background-color: rgb(254, 240, 211);
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	overflow: hidden;
+}
+
+.hidden {
+	display: none;
+}
+
+.money-value::before {
+	content: '$';
 }
 
 .overview {
@@ -66,8 +73,56 @@ body {
 	}
 }
 
-.money-value::before {
-	content: '$';
+.stocks {
+	> div {
+		font-weight: bold;
+	}
+	table {
+		margin-left: 15px;
+		border: 2px solid black;
+		border-spacing: 0px;
+		border-collapse: collapse;
+	}
+	tr {
+		.shadow-gradient;
+	}
+	th, td {
+		border: 1px solid black;
+		padding: 2px 10px;
+		text-align: center;
+	}
+	th {
+		width: 140px;
+	}
+	td {
+		width: 40px;
+	}
+}
+
+.equipment-costs {
+	> div {
+		font-weight: bold;
+	}
+	table {
+		margin: auto;
+		border: 2px solid black;
+		border-spacing: 0px;
+		border-collapse: collapse;
+	}
+	tr {
+		.shadow-gradient;
+	}
+	th, td {
+		border: 1px solid black;
+		text-align: center;
+	}
+	th {
+		padding: 2px 6px;
+	}
+	td {
+		padding: 2px 3px;
+		&.bought { background-color: rgba(0, 0, 0, 0.45) }
+	}
 }
 
 #alert-mask {
@@ -162,11 +217,12 @@ body {
 }
 
 #hex-map-parent {
+	background-color: rgb(222, 239, 247);
 	position: absolute;
-	top: 0px;
-	bottom: 0px;
-	left: @company-width;
-	right: @player-width;
+	top:    0px;
+	bottom: @state-height;
+	left:   @company-width;
+	right:  @player-width;
 }
 
 #player-list {
@@ -178,7 +234,7 @@ body {
 	overflow-y: auto;
 
 	.overview {
-		background-color: rgba(32, 64, 128, 0.25);
+		background-color: rgb(235, 221, 192);
 	}
 
 	.title {
@@ -196,13 +252,40 @@ body {
 	}
 }
 
+#user-input {
+	position: absolute;
+	bottom: 0px;
+	left:   @company-width;
+	right:  @player-width;
+	height: @state-height;
+
+	>div {
+		margin: auto;
+		height: 100%;
+		max-width: 500px;
+		padding: 5px 25px;
+		border: 2px solid black;
+		background: radial-gradient(circle,
+			rgb(254, 240, 211)   0%,
+			rgb(250, 236, 207)  30%,
+			rgb(220, 206, 177) 100%
+		);
+
+	}
+
+	input {
+		width: 2em;
+	}
+}
+
 #game-state {
 	position: absolute;
-	height: @state-height;
 	bottom: 0px;
 	right: 0px;
 	// We subtract by 4 to account for the difference in what elements have the border.
-	width: @player-width - 4;
+	width:  @player-width - 4;
+	// And here we subtract the (total) thickness of our padding and borders.
+	height: @state-height - 14;
 	overflow-y: auto;
 
 	background: radial-gradient(circle,
@@ -219,57 +302,5 @@ body {
 		padding-bottom:  2px;
 		margin-left:    10px;
 		&:not(:first-child) { margin-top: 7px; }
-	}
-}
-
-.stocks {
-	> div {
-		font-weight: bold;
-	}
-	table {
-		margin-left: 15px;
-		border: 2px solid black;
-		border-spacing: 0px;
-		border-collapse: collapse;
-	}
-	tr {
-		.shadow-gradient;
-	}
-	th, td {
-		border: 1px solid black;
-		padding: 2px 10px;
-		text-align: center;
-	}
-	th {
-		width: 140px;
-	}
-	td {
-		width: 40px;
-	}
-}
-
-.equipment-costs {
-	> div {
-		font-weight: bold;
-	}
-	table {
-		margin: auto;
-		border: 2px solid black;
-		border-spacing: 0px;
-		border-collapse: collapse;
-	}
-	tr {
-		.shadow-gradient;
-	}
-	th, td {
-		border: 1px solid black;
-		text-align: center;
-	}
-	th {
-		padding: 2px 6px;
-	}
-	td {
-		padding: 2px 3px;
-		&.bought { background-color: rgba(0, 0, 0, 0.45) }
 	}
 }

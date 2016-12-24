@@ -6,6 +6,7 @@
 	var common    = require('./common');
 	var hex_map   = require('./hex-map');
 
+	var market_regexp   = /^market/i;
 	var game_state = {
 		round: ko.observable(0),
 		phase: ko.observable(""),
@@ -93,10 +94,10 @@
 	}
 
 	module.exports.refresh = refresh;
-	Object.defineProperty(module.exports, 'phase', {
-		get: function () { return game_state.phase(); },
-	});
-	Object.defineProperty(module.exports, 'turn', {
-		get: function () { return game_state.turn(); },
-	});
+	module.exports.turn = ko.computed(function () {
+		return this.turn();
+	}, game_state);
+	module.exports.market_phase = ko.computed(function () {
+		return market_regexp.test(this.phase());
+	}, game_state);
 })();

@@ -4,12 +4,22 @@
 	var domready = require('domready');
 	var common   = require('./common');
 
-	var company_list = ko.observableArray();
+	var company_list = ko.observableArray([]);
 
 	function select_company(name) {
 		company_list().forEach(function (view_model) {
 			view_model.selected(name === view_model.name);
 		});
+	}
+	function get_selected() {
+		var result = '';
+		company_list().some(function (company) {
+			if (company.selected()) {
+				result = company.name;
+				return true;
+			}
+		});
+		return result;
 	}
 
 	function sort_companies() {
@@ -24,6 +34,17 @@
 				return -1;
 			}
 		});
+	}
+
+	function get_president(name) {
+		var result = '';
+		company_list().some(function (company) {
+			if (company.name === name) {
+				result = company.president();
+				return true;
+			}
+		});
+		return result;
 	}
 
 	function convert_equipment() {
@@ -77,4 +98,7 @@
 	domready(function () {
 		ko.applyBindings({companies: company_list}, document.getElementById("company-list"));
 	});
+
+	module.exports.selected  = get_selected;
+	module.exports.president = get_president;
 })();
